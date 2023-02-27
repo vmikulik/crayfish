@@ -187,6 +187,10 @@ impl Tuple {
         )
     }
 
+    pub fn dot(&self, _rhs: &Tuple) -> f64 {
+        self.x * _rhs.x + self.y * _rhs.y + self.z * _rhs.z + self.w * _rhs.w
+    }
+
 }
 
 

@@ -7,6 +7,27 @@ pub enum Axis {
     Z,
 }
 
+pub trait Transformable {
+    fn rotate(&self, axis: Axis, radians: f64) -> Self;
+    fn translate(&self, x: f64, y: f64, z: f64) -> Self;
+    fn scale(&self, x: f64, y: f64, z: f64) -> Self;
+}
+
+impl Transformable for Matrix {
+    fn rotate(&self, axis: Axis, radians: f64) -> Matrix {
+        rotation(axis, radians) / self
+    }
+
+    fn translate(&self, x: f64, y: f64, z: f64) -> Matrix {
+        translation(x, y, z) / self
+    }
+
+    fn scale(&self, x: f64, y: f64, z: f64) -> Matrix {
+        scaling(x, y, z) / self
+    }
+}
+
+
 /// Translates points by the given x, y, and z values.
 ///
 /// Does not affect vectors.
@@ -159,8 +180,7 @@ mod tests {
         Ok(())
     }
 
-    #
-    [test]
+    #[test]
     fn rotating_points_around_z_axis() -> Result<()> {
         let p = Tuple::point(0.0, 1.0, 0.0);
         let half_quarter = rotation(Z, std::f64::consts::PI / 4.0);
@@ -172,6 +192,21 @@ mod tests {
         assert_eq!(
             full_quarter.matmul_t(&p)?,
             Tuple::point(-1.0, 0.0, 0.0)
+        );
+        Ok(())
+    }
+
+
+    #[test]
+    fn fluent_api() -> Result<()> {
+        let p = Tuple::point(1.0, 0., 0.);
+        let transform = Matrix::identity(4)
+            .rotate(Z, std::f64::consts::PI / 2.0)
+            .scale(5.0, 5.0, 5.0)
+            .translate(10.0, 5.0, 7.0);
+        assert_eq!(
+            transform / &p,
+            Tuple::point(10.0, 10.0, 7.0)
         );
         Ok(())
     }
