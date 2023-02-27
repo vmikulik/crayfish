@@ -4,6 +4,8 @@ pub mod tuples_lib;
 pub mod canvas_lib;
 pub mod matrix_lib;
 pub mod transformations_lib;
+pub mod ray_lib;
+pub mod shapes;
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
