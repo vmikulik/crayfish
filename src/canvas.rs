@@ -1,4 +1,4 @@
-use crate::{colors_lib::Color, constants::PBB_COLOR_COMPONENT_MAX};
+use crate::{colors::Color, constants::PBB_COLOR_COMPONENT_MAX};
 
 pub struct Canvas {
     pub width: usize,

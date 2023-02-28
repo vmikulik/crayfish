@@ -1,4 +1,4 @@
-use crate::matrix_lib::Matrix;
+use crate::matrix::Matrix;
 
 
 pub enum Axis {
@@ -100,7 +100,7 @@ pub fn shearing(
 mod tests {
     use super::*;
     use super::Axis::{X, Y, Z};
-    use crate::tuples_lib::*;
+    use crate::tuples::*;
     use crate::Result;
 
     #[test]

@@ -1,10 +1,10 @@
 pub mod constants;
-pub mod colors_lib;
-pub mod tuples_lib;
-pub mod canvas_lib;
-pub mod matrix_lib;
-pub mod transformations_lib;
-pub mod ray_lib;
+pub mod colors;
+pub mod tuples;
+pub mod canvas;
+pub mod matrix;
+pub mod transformations;
+pub mod ray;
 pub mod shapes;
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;

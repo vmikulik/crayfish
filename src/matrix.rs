@@ -1,6 +1,6 @@
 use crate::Result;
 use crate::constants::EPSILON;
-use crate::tuples_lib::Tuple;
+use crate::tuples::Tuple;
 use crate::eq;
 
 #[derive(Debug, Clone)]

@@ -1,7 +1,7 @@
-use crate::ray_lib::Intersection;
-use crate::ray_lib::Intersectable;
-use crate::ray_lib::intersect;
-use crate::ray_lib::Ray;
+use crate::ray::Intersection;
+use crate::ray::Intersectable;
+use crate::ray::intersect;
+use crate::ray::Ray;
 
 pub struct Sphere {}
 
@@ -14,7 +14,7 @@ impl Sphere {
 impl Intersectable for Sphere {
     fn intersect(&self, ray: &Ray) -> Vec<Intersection>{
 
-        let sphere_to_ray = &ray.origin - crate::tuples_lib::Tuple::point(0.0, 0.0, 0.0);
+        let sphere_to_ray = &ray.origin - crate::tuples::Tuple::point(0.0, 0.0, 0.0);
         let a = ray.direction.dot(&ray.direction);
         let b = 2.0 * ray.direction.dot(&sphere_to_ray);
         let c = sphere_to_ray.dot(&sphere_to_ray) - 1.0;

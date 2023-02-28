@@ -1,6 +1,6 @@
-use crayfish::canvas_lib::Canvas;
-use crayfish::colors_lib::Color;
-use crayfish::tuples_lib::Tuple;
+use crayfish::canvas::Canvas;
+use crayfish::colors::Color;
+use crayfish::tuples::Tuple;
 
 const GRAVITATIONAL_ACCELERATION: f64 = 0.01;
 const TIMESTEPS: usize = 500;
