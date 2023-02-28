@@ -13,11 +13,16 @@ impl Intersection<'_> {
 }
 
 pub fn intersect<'a>(ray: &Ray, obj: &'a Object) -> Vec<Intersection<'a>> {
+    let ray_in_sphere_space = ray.transform(&obj.transform.inverse().unwrap());
     match &obj.shape {
-        Shape::Sphere => intersect_sphere(ray, obj),
+        Shape::Sphere => intersect_sphere(&ray_in_sphere_space, obj),
     }
 }
 
+/// Returns the intersection(s) of a ray (in sphere-space) with a sphere.
+///
+/// By 'in sphere-space', we mean that we're using coordinates where
+/// the sphere's origin is at the origin, and its radius is 1.0.
 fn intersect_sphere<'a>(ray: &Ray, obj: &'a Object) -> Vec<Intersection<'a>>{
 
     let sphere_to_ray = &ray.origin - crate::tuples::Tuple::point(0.0, 0.0, 0.0);
