@@ -1,5 +1,5 @@
 use crate::tuples::Tuple;
-use crate::shapes::Sphere;
+use crate::matrix::Matrix;
 
 
 pub struct Ray {
@@ -19,27 +19,41 @@ impl Ray {
         }
     }
 
+    pub fn transform(&self, m: &Matrix) -> Ray {
+        Ray {
+            origin: m / &self.origin,
+            direction: m / &self.direction,
+        }
+    }
+
     pub fn position(&self, t: f64) -> Tuple {
         &self.origin + &self.direction * t
     }
 
 }
 
-pub struct Intersection<'a> {
-    pub t: f64,
-    pub object: &'a Sphere,
-}
 
-impl Intersection<'_> {
-    pub fn new<'a>(t: f64, object: &'a Sphere) -> Intersection<'a> {
-        Intersection { t, object }
+#[cfg(test)]
+mod ray_transform_tests {
+    use super::*;
+    use crate::transformations::*;
+
+    #[test]
+    fn translating_a_ray() {
+        let r = Ray::from_coords(1.0, 2.0, 3.0, 0.0, 1.0, 0.0);
+        let m = translation(3.0, 4.0, 5.0);
+        let r2 = r.transform(&m);
+        assert_eq!(r2.origin, Tuple::point(4., 6., 8.));
+        assert_eq!(r2.direction, Tuple::vector(0., 1., 0.));
+    }
+
+    #[test]
+    fn scaling_a_ray() {
+        let r = Ray::from_coords(1., 2., 3., 0., 1., 0.,);
+        let m = scaling(2., 3., 4.);
+        let r2 = r.transform(&m);
+        assert_eq!(r2.origin, Tuple::point(2., 6., 12.));
+        assert_eq!(r2.direction, Tuple::vector(0., 3., 0.));
     }
 }
 
-pub trait Intersectable {
-    fn intersect(&self, ray: &Ray) -> Vec<Intersection>;
-}
-
-pub fn intersect<'a, T: Intersectable>(ray: &Ray, obj: &'a T) -> Vec<Intersection<'a>> {
-    obj.intersect(ray)
-}
