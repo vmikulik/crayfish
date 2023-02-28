@@ -1,7 +1,9 @@
+#[derive(Debug)]
 pub enum Shape {
     Sphere,
 }
 
+#[derive(Debug)]
 pub struct Object {
     pub shape: Shape,
 }
