@@ -1,5 +1,5 @@
 use crate::constants::EPSILON;
-
+use crate::eq;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Tuple {
@@ -198,86 +198,149 @@ impl Tuple {
 }
 
 
-
-
 #[cfg(test)]
 mod tests {
+    use proptest::prelude::*;
     use super::*;
 
-    #[test]
-    fn tuple_with_w1_is_a_point() {
-        let a  = Tuple::new(4.3, -4.2, 3.1, 1.0);
-        assert!(a.is_point());
-        assert!(!a.is_vector());
-        assert_eq!(a.x, 4.3);
-        assert_eq!(a.y, -4.2);
-        assert_eq!(a.z, 3.1);
-        assert_eq!(a.w, 1.0);
+    proptest! {
+        #[test]
+        fn tuple_with_w1_is_a_point(
+            x in any::<f64>(),
+            y in any::<f64>(),
+            z in any::<f64>(),
+        ) {
+            let a  = Tuple::new(x, y, z, 1.0);
+            assert!(a.is_point());
+            assert!(!a.is_vector());
+            assert_eq!(a.x, x);
+            assert_eq!(a.y, y);
+            assert_eq!(a.z, z);
+            assert_eq!(a.w, 1.0);
+        }
+
+        #[test]
+        fn tuple_with_w0_is_a_vector(
+            x in any::<f64>(),
+            y in any::<f64>(),
+            z in any::<f64>(),
+        ) {
+            let a  = Tuple::new(x, y, z, 0.0);
+            assert!(!a.is_point());
+            assert!(a.is_vector());
+            assert_eq!(a.x, x);
+            assert_eq!(a.y, y);
+            assert_eq!(a.z, z);
+            assert_eq!(a.w, 0.0);
+        }
+
+        #[test]
+        fn vector_constructor_returns_a_vector(
+            x in any::<f64>(),
+            y in any::<f64>(),
+            z in any::<f64>(),
+        ) {
+            let a = Tuple::new(x, y, z, 0.0);
+            let b = Tuple::vector(x, y, z);
+            assert_eq!(a, b);
+        }
+
+        #[test]
+        fn point_constructor_returns_a_point(
+            x in any::<f64>(),
+            y in any::<f64>(),
+            z in any::<f64>(),
+        ) {
+            let a = Tuple::new(x, y, z, 1.0);
+            let b = Tuple::point(x, y, z);
+            assert_eq!(a, b);
+        }
+
+        #[test]
+        fn adding_vectors(
+            x1 in any::<f64>(),
+            y1 in any::<f64>(),
+            z1 in any::<f64>(),
+            x2 in any::<f64>(),
+            y2 in any::<f64>(),
+            z2 in any::<f64>(),
+        ) {
+            let a = Tuple::vector(x1, y1, z1);
+            let b = Tuple::vector(x2, y2, z2);
+            let c = Tuple::vector(x1 + x2, y1 + y2, z1 + z2);
+            assert_eq!(a + b, c);
+        }
+
+        #[test]
+        fn subtracting_vector_from_point_returns_a_vector(
+            x1 in any::<f64>(),
+            y1 in any::<f64>(),
+            z1 in any::<f64>(),
+            x2 in any::<f64>(),
+            y2 in any::<f64>(),
+            z2 in any::<f64>(),
+        ) {
+            let a = Tuple::point(x1, y1, z1);
+            let b = Tuple::vector(x2, y2, z2);
+            let c = Tuple::point(x1 - x2, y1 - y2, z1 - z2);
+            assert_eq!(a - b, c);
+        }
+
+        #[test]
+        fn subtracting_vector_from_vector_returns_vector(
+            x1 in any::<f64>(),
+            y1 in any::<f64>(),
+            z1 in any::<f64>(),
+            x2 in any::<f64>(),
+            y2 in any::<f64>(),
+            z2 in any::<f64>(),
+        ) {
+            let a = Tuple::vector(x1, y1, z1);
+            let b = Tuple::vector(x2, y2, z2);
+            let c = Tuple::vector(x1 - x2, y1 - y2, z1 - z2);
+            assert_eq!(a - b, c);
+        }
+
+        #[test]
+        fn negating_tuple(
+            x in any::<f64>(),
+            y in any::<f64>(),
+            z in any::<f64>(),
+            w in any::<f64>(),
+        ) {
+            let a = Tuple::new(x, y, z, w);
+            let b = Tuple::new(-x, -y, -z, -w);
+            assert_eq!(-a, b);
+        }
+
+        #[test]
+        fn magnitude_of_unit_vector_is_one(
+            x in -1000.0..1000.00,
+            y in -1000.0..1000.00,
+            z in -1000.0..1000.00,
+        ) {
+            let a = Tuple::vector(x, y, z);
+            assert!(eq(a.unit().magnitude(), 1.))
+        }
+
+        #[test]
+        fn cross_product_is_perpendicular_to_inputs(
+            x1 in -1000.0..1000.00,
+            y1 in -1000.0..1000.00,
+            z1 in -1000.0..1000.00,
+            x2 in -1000.0..1000.00,
+            y2 in -1000.0..1000.00,
+            z2 in -1000.0..1000.00,
+        ) {
+            let a = Tuple::vector(x1, y1, z1);
+            let b = Tuple::vector(x2, y2, z2);
+            let c = a.cross(&b);
+            assert!(eq(a.dot(&c), 0.));
+            assert!(eq(b.dot(&c), 0.));
+        }
+
     }
 
-    #[test]
-    fn tuple_with_w0_is_a_vector() {
-        let a = Tuple::new(4.3, -4.2, 3.1, 0.0);
-        assert!(a.is_vector());
-        assert!(!a.is_point());
-        assert_eq!(a.x, 4.3);
-        assert_eq!(a.y, -4.2);
-        assert_eq!(a.z, 3.1);
-        assert_eq!(a.w, 0.0);
-    }
-
-    #[test]
-    fn vector_constructor_returns_a_vector() {
-        let a = Tuple::new(4.3, -4.2, 3.1, 0.0);
-        let b = Tuple::vector(4.3, -4.2, 3.1);
-        assert_eq!(a, b);
-    }
-
-    #[test]
-    fn point_constructor_returns_a_point() {
-        let a = Tuple::new(4.3, -4.2, 3.1, 1.0);
-        let b = Tuple::point(4.3, -4.2, 3.1);
-        assert_eq!(a, b);
-    }
-
-    #[test]
-    fn adding_vectors() {
-        let a = Tuple::vector(3., -2., 5.);
-        let b = Tuple::vector(-2., 3., 1.);
-        let c = Tuple::vector(1., 1., 6.);
-        assert_eq!(a + b, c);
-    }
-
-    #[test]
-    fn subtracting_points_returns_vector() {
-        let a = Tuple::point(3., 2., 1.);
-        let b = Tuple::point(5., 6., 7.);
-        let c = Tuple::vector(-2., -4., -6.);
-        assert_eq!(a - b, c);
-    }
-
-    #[test]
-    fn subtracting_vector_from_point_returns_point() {
-        let a = Tuple::point(3., 2., 1.);
-        let b = Tuple::vector(5., 6., 7.);
-        let c = Tuple::point(-2., -4., -6.);
-        assert_eq!(a - b, c);
-    }
-
-    #[test]
-    fn subtracting_vector_from_vector_returns_vector() {
-        let a = Tuple::vector(3., 2., 1.);
-        let b = Tuple::vector(5., 6., 7.);
-        let c = Tuple::vector(-2., -4., -6.);
-        assert_eq!(a - b, c);
-    }
-
-    #[test]
-    fn negating_tuple() {
-        let a = Tuple::new(1., -2., 3., -4.);
-        let b = Tuple::new(-1., 2., -3., 4.);
-        assert_eq!(-a, b);
-    }
 
     #[test]
     fn multiplying_tuple_by_scalar() {

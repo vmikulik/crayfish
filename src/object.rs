@@ -1,4 +1,8 @@
 use crate::matrix::Matrix;
+use crate::tuples::Tuple;
+use crate::normal::{
+    normal_at_sphere
+};
 
 #[derive(Debug)]
 pub enum Shape {
@@ -9,6 +13,7 @@ pub enum Shape {
 pub struct Object {
     pub shape: Shape,
     pub transform: Matrix,
+    pub inverse_transform: Matrix,
 }
 
 impl Object {
@@ -16,13 +21,22 @@ impl Object {
         Object {
             shape: Shape::Sphere,
             transform: Matrix::identity(4),
+            inverse_transform: Matrix::identity(4),
         }
     }
 
     pub fn with_transform(self, transform: Matrix) -> Object {
+        let inverse_transform = transform.inverse().unwrap();
         Object {
             transform,
+            inverse_transform,
             ..self
+        }
+    }
+
+    pub fn normal_at(self, position: Tuple) -> Tuple {
+        match self.shape {
+            Shape::Sphere => normal_at_sphere(&self, position)
         }
     }
 }
