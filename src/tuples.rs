@@ -1,7 +1,7 @@
 use crate::constants::EPSILON;
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Tuple {
     pub x: f64,
     pub y: f64,
@@ -189,6 +189,10 @@ impl Tuple {
 
     pub fn dot(&self, _rhs: &Tuple) -> f64 {
         self.x * _rhs.x + self.y * _rhs.y + self.z * _rhs.z + self.w * _rhs.w
+    }
+
+    pub fn as_array(&self) -> [f64; 4] {
+        [self.x, self.y, self.z, self.w]
     }
 
 }

@@ -13,7 +13,7 @@ impl Intersection<'_> {
 }
 
 pub fn intersect<'a>(ray: &Ray, obj: &'a Object) -> Vec<Intersection<'a>> {
-    let ray_in_sphere_space = ray.transform(&obj.transform.inverse().unwrap());
+    let ray_in_sphere_space = ray.transform(&obj.inverse_transform);
     match &obj.shape {
         Shape::Sphere => intersect_sphere(&ray_in_sphere_space, obj),
     }

@@ -195,15 +195,19 @@ impl Matrix {
         if self.width != 4 || self.height != 4 {
             return Err("Matrix must be 4x4".into());
         }
-        let rhs_matrix = Matrix::from_rows(
-            &vec![vec![_rhs.x], vec![_rhs.y], vec![_rhs.z], vec![_rhs.w]]
-        )?;
-        let result = self.matmul(&rhs_matrix)?;
+        let rhs_contents = _rhs.as_array();
+        let mut out: [f64; 4] = [0.0; 4];
+        for i in 0..self.height {
+            for j in 0..self.width {
+                out[i] += self.contents[i][j] *rhs_contents[j]
+            }
+        }
+
         Ok(Tuple::new(
-            result.contents[0][0],
-            result.contents[1][0],
-            result.contents[2][0],
-            result.contents[3][0],
+            out[0],
+            out[1],
+            out[2],
+            out[3],
         ))
     }
 
