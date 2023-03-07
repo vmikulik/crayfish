@@ -1,5 +1,4 @@
 use crate::constants::EPSILON;
-use crate::eq;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Tuple {
@@ -201,6 +200,7 @@ impl Tuple {
 #[cfg(test)]
 mod tests {
     use proptest::prelude::*;
+    use crate::eq;
     use super::*;
 
     proptest! {
