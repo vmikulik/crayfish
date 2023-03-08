@@ -12,6 +12,7 @@ pub fn reflect(incoming: Tuple, normal: Tuple) -> Tuple {
 mod reflection_tests {
     use proptest::prelude::*;
     use crate::eq;
+    use crate::tuples::proptest_strategies::vector;
 
     use super::*;
 
@@ -19,15 +20,9 @@ mod reflection_tests {
 
         #[test]
         fn reflection_has_same_magnitude_as_incoming(
-            in_x in -1000.0..1000.0,
-            in_y in -1000.0..1000.0,
-            in_z in -1000.0..1000.0,
-            n_x in -1000.0..1000.0,
-            n_y in -1000.0..1000.0,
-            n_z in -1000.0..1000.0,
+            normal in vector(100.).prop_map(|v| v.unit()),
+            incoming in vector(100.),
         ) {
-            let normal = Tuple::vector(n_x, n_y, n_z).unit();
-            let incoming = Tuple::vector(in_x, in_y, in_z);
             prop_assume!(normal.dot(&incoming) < 0.);
             assert!(eq(
                 reflect(incoming, normal).magnitude(),
@@ -37,15 +32,9 @@ mod reflection_tests {
 
         #[test]
         fn reflection_has_opposite_dot_with_normal_as_incoming(
-            in_x in -1000.0..1000.0,
-            in_y in -1000.0..1000.0,
-            in_z in -1000.0..1000.0,
-            n_x in -1000.0..1000.0,
-            n_y in -1000.0..1000.0,
-            n_z in -1000.0..1000.0,
+            normal in vector(100.).prop_map(|v| v.unit()),
+            incoming in vector(100.),
         ) {
-            let normal = Tuple::vector(n_x, n_y, n_z).unit();
-            let incoming = Tuple::vector(in_x, in_y, in_z);
             prop_assume!(normal.dot(&incoming) < 0.);
             assert!(eq(
                 reflect(incoming, normal).dot(&normal),

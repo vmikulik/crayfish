@@ -8,6 +8,33 @@ pub struct Tuple {
     pub w: f64,
 }
 
+#[cfg(test)]
+pub mod proptest_strategies {
+    use proptest::prelude::*;
+    use super::Tuple;
+
+    /// Strategy for vectors with given maximum values.
+    pub fn vector(max_val: f64) -> impl Strategy<Value = Tuple> {
+        (
+            -max_val..max_val,
+            -max_val..max_val,
+            -max_val..max_val,
+        ).prop_map(|(x, y, z)| {
+            Tuple::vector(x, y, z)
+        })
+    }
+
+    /// Strategy for points with given maximum values.
+    pub fn point(max_val: f64) -> impl Strategy<Value = Tuple> {
+        (
+            -max_val..max_val,
+            -max_val..max_val,
+            -max_val..max_val,
+        ).prop_map(|(x, y, z)| {
+            Tuple::point(x, y, z)
+        })
+    }
+}
 
 impl std::cmp::PartialEq for Tuple {
     fn eq(&self, _rhs: &Tuple) -> bool {
@@ -202,6 +229,9 @@ mod tests {
     use proptest::prelude::*;
     use crate::eq;
     use super::*;
+    use super::proptest_strategies::point as point_strat;
+    use super::proptest_strategies::vector as vector_strat;
+
 
     proptest! {
         #[test]
@@ -258,46 +288,28 @@ mod tests {
 
         #[test]
         fn adding_vectors(
-            x1 in any::<f64>(),
-            y1 in any::<f64>(),
-            z1 in any::<f64>(),
-            x2 in any::<f64>(),
-            y2 in any::<f64>(),
-            z2 in any::<f64>(),
+            a in vector_strat(100.),
+            b in vector_strat(100.),
         ) {
-            let a = Tuple::vector(x1, y1, z1);
-            let b = Tuple::vector(x2, y2, z2);
-            let c = Tuple::vector(x1 + x2, y1 + y2, z1 + z2);
+            let c = Tuple::vector(a.x + b.x, a.y + b.y, a.z + b.z);
             assert_eq!(a + b, c);
         }
 
         #[test]
-        fn subtracting_vector_from_point_returns_a_vector(
-            x1 in any::<f64>(),
-            y1 in any::<f64>(),
-            z1 in any::<f64>(),
-            x2 in any::<f64>(),
-            y2 in any::<f64>(),
-            z2 in any::<f64>(),
+        fn subtracting_vector_from_point_returns_a_point(
+            a in point_strat(100.),
+            b in vector_strat(100.),
         ) {
-            let a = Tuple::point(x1, y1, z1);
-            let b = Tuple::vector(x2, y2, z2);
-            let c = Tuple::point(x1 - x2, y1 - y2, z1 - z2);
+            let c = Tuple::point(a.x - b.x, a.y - b.y, a.z - b.z);
             assert_eq!(a - b, c);
         }
 
         #[test]
         fn subtracting_vector_from_vector_returns_vector(
-            x1 in any::<f64>(),
-            y1 in any::<f64>(),
-            z1 in any::<f64>(),
-            x2 in any::<f64>(),
-            y2 in any::<f64>(),
-            z2 in any::<f64>(),
+            a in vector_strat(100.),
+            b in vector_strat(100.),
         ) {
-            let a = Tuple::vector(x1, y1, z1);
-            let b = Tuple::vector(x2, y2, z2);
-            let c = Tuple::vector(x1 - x2, y1 - y2, z1 - z2);
+            let c = Tuple::vector(a.x - b.x, a.y - b.y, a.z - b.z);
             assert_eq!(a - b, c);
         }
 
@@ -315,25 +327,16 @@ mod tests {
 
         #[test]
         fn magnitude_of_unit_vector_is_one(
-            x in -1000.0..1000.00,
-            y in -1000.0..1000.00,
-            z in -1000.0..1000.00,
+            a in vector_strat(100.)
         ) {
-            let a = Tuple::vector(x, y, z);
             assert!(eq(a.unit().magnitude(), 1.))
         }
 
         #[test]
         fn cross_product_is_perpendicular_to_inputs(
-            x1 in -1000.0..1000.00,
-            y1 in -1000.0..1000.00,
-            z1 in -1000.0..1000.00,
-            x2 in -1000.0..1000.00,
-            y2 in -1000.0..1000.00,
-            z2 in -1000.0..1000.00,
+            a in vector_strat(100.),
+            b in vector_strat(100.),
         ) {
-            let a = Tuple::vector(x1, y1, z1);
-            let b = Tuple::vector(x2, y2, z2);
             let c = a.cross(&b);
             assert!(eq(a.dot(&c), 0.));
             assert!(eq(b.dot(&c), 0.));
