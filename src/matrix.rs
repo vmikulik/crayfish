@@ -284,6 +284,20 @@ fn cofactor(m: &Matrix, row: usize, col: usize) -> Result<f64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use proptest_strategies::matrix_4x4;
+    use proptest::prelude::*;
+
+    proptest! {
+
+        #[test]
+        fn matmul_4x4_by_inverse_gives_identity(
+            a in matrix_4x4(100.),
+        ) {
+            prop_assume!(a.is_invertible().unwrap());
+            prop_assert_eq!(&a / &a.inverse().unwrap(), Matrix::identity(4))
+        }
+    }
+
 
     #[test]
     fn two_by_two_matmul() -> Result<()> {
@@ -484,4 +498,22 @@ mod tests {
     }
 
 
+}
+
+
+#[cfg(test)]
+pub mod proptest_strategies {
+    use proptest::prelude::*;
+    use super::Matrix;
+
+    pub fn matrix_4x4(max_val: f64) -> impl Strategy<Value = Matrix> {
+        return (
+            prop::collection::vec(-max_val..max_val, 4),
+            prop::collection::vec(-max_val..max_val, 4),
+            prop::collection::vec(-max_val..max_val, 4),
+            prop::collection::vec(-max_val..max_val, 4),
+        ).prop_map(|(r1, r2, r3, r4)|
+            Matrix::from_rows(&vec![r1, r2, r3, r4]).unwrap()
+        )
+    }
 }
