@@ -1,29 +1,19 @@
+use std::f64::consts::PI;
+
+use crayfish::camera::Camera;
 use crayfish::canvas::Canvas;
 use crayfish::colors::Color;
 use crayfish::intersection::{intersect, hit, Intersectable};
 use crayfish::object::Object;
 use crayfish::tuples::Tuple;
-use crayfish::matrix::Matrix;
-use crayfish::{transformations::*, normal};
+use crayfish::transformations::*;
 use crayfish::ray::Ray;
 use crayfish::groups::ObjectGroup;
 
-const WIDTH: usize = 500;
-const HEIGHT: usize = 500;
+const ASPECT_RATIO: f64 = 16./9.;
+const FOV: f64 = PI / 3.;
 
-const FOCAL_LENGTH: f64 = 0.5;
-const DISTANCE: f64 = 4.;
-const RADIUS: f64 = 1.;
-
-/// Convert a pixel coordinate to a point on the canvas plane.
-/// The canvas plane is centered at the origin, and has a coordinate width and height of 1.
-fn plane_coord_from_canvas_coord(x: usize, y: usize) -> (f64, f64) {
-    let x = x as f64;
-    let y = y as f64;
-    let x = (x - WIDTH as f64 / 2.) / WIDTH as f64;
-    let y = -(y - HEIGHT as f64 / 2.) / HEIGHT as f64;
-    (x, y)
-}
+const IMAGE_HEIGHT: usize = 500;
 
 
 fn ray_color(ray: &Ray, world: &impl Intersectable) -> Color {
@@ -36,7 +26,7 @@ fn ray_color(ray: &Ray, world: &impl Intersectable) -> Color {
     };
 
 
-    // missed everything in the world: draw the sky.
+    // Missed everything in the world: draw the sky.
     let t = (1. + ray.direction.unit().y) / 2.;
     let blue = Color::from_u8(135, 181, 235);
     let lightblue = Color::from_u8(135, 231, 235);
@@ -47,33 +37,37 @@ fn ray_color(ray: &Ray, world: &impl Intersectable) -> Color {
 
 fn main() {
 
-    let mut canvas = Canvas::new(WIDTH, HEIGHT);
+    // Canvas
+    let image_width = (ASPECT_RATIO * IMAGE_HEIGHT as f64) as usize;
+    let mut canvas = Canvas::new(image_width, IMAGE_HEIGHT);
 
-    // let's render a sphere by casting rays from a viewpoint behind the camera
-    // to the sphere, passing through the plane of the canvas:
-    //
-    //                canvas plane
-    //                     |
-    // ray origin          |         sphere
-    //                     |
-    //
+    // Camera
+    let camera = Camera::new(
+        Tuple::point(0., 0., -3.),
+        Tuple::point(0., 0., 0.),
+        ASPECT_RATIO,
+        FOV,
+    );
 
-    let ray_origin = Tuple::point(0., 0., -FOCAL_LENGTH);
-    let sphere_origin = Tuple::point(0., 0., DISTANCE);
-
+    // World
     let mut world = ObjectGroup::new();
     world.add(Object::new_sphere().with_transform(
-        Matrix::identity(4)
-            .translate(sphere_origin.x, sphere_origin.y, sphere_origin.z)
-            .scale(RADIUS, RADIUS, RADIUS)
+        translation(0., 0., 0.)
+    ));
+    world.add(Object::new_sphere().with_transform(
+        translation(0., 2., 0.,)
     ));
 
-    for y_pixel in 0..HEIGHT {
-        println!("Rendering row {} of {}", y_pixel, HEIGHT);
-        for x_pixel in 0..WIDTH {
-            let (x, y) = plane_coord_from_canvas_coord(x_pixel, y_pixel);
-            let ray_direction = Tuple::vector(x, y, FOCAL_LENGTH).unit();
-            let ray = Ray::new(ray_origin, ray_direction);
+    // Main loop
+    for y_pixel in 0..IMAGE_HEIGHT {
+        if y_pixel % 50 == 0 {
+            println!("Rendering row {} of {}", y_pixel, IMAGE_HEIGHT);
+        }
+        for x_pixel in 0..image_width {
+            let y = y_pixel as f64 / IMAGE_HEIGHT as f64;
+            let x = x_pixel as f64 / image_width as f64;
+
+            let ray = camera.cast_ray(x, y);
             let color = ray_color(&ray, &world);
             canvas.write_pixel(x_pixel, y_pixel, color);
         }
