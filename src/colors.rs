@@ -13,6 +13,28 @@ impl Color {
     pub fn new(red: f64, green: f64, blue: f64) -> Color {
         Color {red, green, blue}
     }
+
+    pub fn from_u8(red: u8, green: u8, blue: u8) -> Color {
+        Color {
+            red: red as f64 / u8::MAX as f64,
+            green: green as f64 / u8::MAX as f64,
+            blue: blue as f64 / u8::MAX as f64,
+        }
+    }
+}
+
+
+#[cfg(test)]
+mod constructor_tests {
+    use super::*;
+
+    #[test]
+    fn from_u8_works_as_expected() {
+        let c = Color::from_u8(0, 0, 255);
+        assert_eq!(c.red, 0.);
+        assert_eq!(c.green, 0.);
+        assert_eq!(c.blue, 1.);
+    }
 }
 
 

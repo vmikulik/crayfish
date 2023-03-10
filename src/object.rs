@@ -34,9 +34,9 @@ impl Object {
         }
     }
 
-    pub fn normal_at(self, position: Tuple) -> Tuple {
+    pub fn normal_at(&self, position: Tuple) -> Tuple {
         match self.shape {
-            Shape::Sphere => normal_at_sphere(&self, position)
+            Shape::Sphere => normal_at_sphere(&self, &position)
         }
     }
 }

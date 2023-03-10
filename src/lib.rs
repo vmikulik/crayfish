@@ -8,6 +8,7 @@ pub mod ray;
 pub mod intersection;
 pub mod object;
 pub mod normal;
+pub mod groups;
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 

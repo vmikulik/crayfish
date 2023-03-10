@@ -1,5 +1,6 @@
 use crate::{object::Object, tuples::Tuple};
 
+
 /// Reflects vector `v` in a surface with `normal`.
 ///
 /// Assumes `normal` is a unit vector.
@@ -46,7 +47,7 @@ mod reflection_tests {
 }
 
 
-pub fn normal_at_sphere(obj: &Object, world_point: Tuple) -> Tuple {
+pub fn normal_at_sphere(obj: &Object, world_point: &Tuple) -> Tuple {
     let object_point = &obj.inverse_transform / world_point;
     let object_normal = object_point - Tuple::point(0., 0., 0.);
     // The correct transformation for normals isn't what you expect!

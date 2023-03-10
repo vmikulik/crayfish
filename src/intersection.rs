@@ -12,12 +12,25 @@ impl Intersection<'_> {
     }
 }
 
-pub fn intersect<'a>(ray: &Ray, obj: &'a Object) -> Vec<Intersection<'a>> {
-    let ray_in_sphere_space = ray.transform(&obj.inverse_transform);
-    match &obj.shape {
-        Shape::Sphere => intersect_sphere(&ray_in_sphere_space, obj),
+pub trait Intersectable {
+    fn intersect<'a>(ray: &Ray, obj: &'a Self) -> Vec<Intersection<'a>>;
+}
+
+
+impl Intersectable for Object {
+    fn intersect<'a>(ray: &Ray, obj: &'a Self) -> Vec<Intersection<'a>> {
+        let ray_in_sphere_space = ray.transform(&obj.inverse_transform);
+        match &obj.shape {
+            Shape::Sphere => intersect_sphere(&ray_in_sphere_space, obj),
+        }
     }
 }
+
+
+pub fn intersect<'a>(ray: &Ray, obj: &'a impl Intersectable) ->  Vec<Intersection<'a>> {
+    Intersectable::intersect(ray, obj)
+}
+
 
 /// Returns the intersection(s) of a ray (in sphere-space) with a sphere.
 ///
@@ -98,10 +111,13 @@ mod sphere_intersection_tests {
 
 }
 
-pub fn hit<'a, 'b>(xs: &'b [Intersection<'a>]) -> Option<&'b Intersection<'a>> {
+pub fn hit<'a, 'b>(
+    xs: &'b [Intersection<'a>],
+    min_t: f64,
+) -> Option<&'b Intersection<'a>> {
     let positive_hits = xs
         .iter()
-        .filter(|x| x.t > 0.0);
+        .filter(|x| min_t < x.t);
 
     minimum_by_key(positive_hits, |x| x.t)
 }
@@ -116,7 +132,7 @@ mod hit_tests {
         let i1 = Intersection::new(1.0, &s);
         let i2 = Intersection::new(2.0, &s);
         let xs = vec![i1, i2];
-        let i = hit(&xs).unwrap();
+        let i = hit(&xs, 0.).unwrap();
         assert_eq!(i.t, 1.0);
     }
 
@@ -126,7 +142,7 @@ mod hit_tests {
         let i1 = Intersection::new(-1.0, &s);
         let i2 = Intersection::new(1.0, &s);
         let xs = vec![i1, i2];
-        let i = hit(&xs).unwrap();
+        let i = hit(&xs, 0.).unwrap();
         assert_eq!(i.t, 1.0);
     }
 
@@ -136,7 +152,7 @@ mod hit_tests {
         let i1 = Intersection::new(-2.0, &s);
         let i2 = Intersection::new(-1.0, &s);
         let xs = vec![i1, i2];
-        let i = hit(&xs);
+        let i = hit(&xs, 0.);
         assert!(i.is_none());
     }
 
@@ -148,7 +164,7 @@ mod hit_tests {
         let i3 = Intersection::new(-3.0, &s);
         let i4 = Intersection::new(2.0, &s);
         let xs = vec![i1, i2, i3, i4];
-        let i = hit(&xs).unwrap();
+        let i = hit(&xs, 0.).unwrap();
         assert_eq!(i.t, 2.0);
     }
 
