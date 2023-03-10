@@ -75,13 +75,16 @@ fn main() {
 
             let mut color = Color::new(0., 0., 0.);
             for _ in 0..SAMPLES_PER_PIXEL {
-                let x_sample = rng.gen_range(x..x+pixel_height);
+                let x_sample = rng.gen_range(x..x+pixel_width);
                 let y_sample = rng.gen_range(y..y+pixel_height);
 
                 let ray = camera.cast_ray(x_sample, y_sample);
                 color = color + ray_color(&ray, &world);
             }
-            canvas.write_pixel(x_pixel, y_pixel, color * (1./SAMPLES_PER_PIXEL as f64));
+            canvas.write_pixel(
+                x_pixel,
+                IMAGE_HEIGHT - y_pixel,  // Canvas uses an inverted y coordinate.
+                color * (1./SAMPLES_PER_PIXEL as f64));
         }
     }
 
