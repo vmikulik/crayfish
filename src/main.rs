@@ -9,11 +9,14 @@ use crayfish::tuples::Tuple;
 use crayfish::transformations::*;
 use crayfish::ray::Ray;
 use crayfish::groups::ObjectGroup;
+use rand::Rng;
 
 const ASPECT_RATIO: f64 = 16./9.;
 const FOV: f64 = PI / 3.;
 
 const IMAGE_HEIGHT: usize = 500;
+
+const SAMPLES_PER_PIXEL: usize = 10;
 
 
 fn ray_color(ray: &Ray, world: &impl Intersectable) -> Color {
@@ -36,10 +39,13 @@ fn ray_color(ray: &Ray, world: &impl Intersectable) -> Color {
 
 
 fn main() {
+    let mut rng = rand::thread_rng();
 
     // Canvas
     let image_width = (ASPECT_RATIO * IMAGE_HEIGHT as f64) as usize;
     let mut canvas = Canvas::new(image_width, IMAGE_HEIGHT);
+    let pixel_height = 1. / IMAGE_HEIGHT as f64;
+    let pixel_width = 1. / image_width as f64;
 
     // Camera
     let camera = Camera::new(
@@ -67,9 +73,15 @@ fn main() {
             let y = y_pixel as f64 / IMAGE_HEIGHT as f64;
             let x = x_pixel as f64 / image_width as f64;
 
-            let ray = camera.cast_ray(x, y);
-            let color = ray_color(&ray, &world);
-            canvas.write_pixel(x_pixel, y_pixel, color);
+            let mut color = Color::new(0., 0., 0.);
+            for _ in 0..SAMPLES_PER_PIXEL {
+                let x_sample = rng.gen_range(x..x+pixel_height);
+                let y_sample = rng.gen_range(y..y+pixel_height);
+
+                let ray = camera.cast_ray(x_sample, y_sample);
+                color = color + ray_color(&ray, &world);
+            }
+            canvas.write_pixel(x_pixel, y_pixel, color * (1./SAMPLES_PER_PIXEL as f64));
         }
     }
 
