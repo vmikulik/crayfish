@@ -189,6 +189,18 @@ impl Tuple {
         Tuple { x, y, z, w: 1.0 }
     }
 
+    pub fn random_vector_in_unit_sphere(rng: &mut impl rand::Rng) -> Tuple {
+        loop {
+            let x = rng.gen_range(-1.0..1.0);
+            let y = rng.gen_range(-1.0..1.0);
+            let z = rng.gen_range(-1.0..1.0);
+            let vec = Tuple::vector(x, y, z);
+            if vec.magnitude() < 1. {
+                return vec
+            }
+        }
+    }
+
     pub fn is_vector(&self) -> bool {
         self.w == 0.0
     }

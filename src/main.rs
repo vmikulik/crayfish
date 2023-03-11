@@ -3,7 +3,9 @@ use std::f64::consts::PI;
 use crayfish::camera::Camera;
 use crayfish::canvas::Canvas;
 use crayfish::colors::Color;
+use crayfish::constants::EPSILON;
 use crayfish::intersection::{intersect, hit, Intersectable};
+use crayfish::materials::Scattered;
 use crayfish::object::Object;
 use crayfish::tuples::Tuple;
 use crayfish::transformations::*;
@@ -19,13 +21,20 @@ const IMAGE_HEIGHT: usize = 500;
 const SAMPLES_PER_PIXEL: usize = 10;
 
 
-fn ray_color(ray: &Ray, world: &impl Intersectable) -> Color {
+fn ray_color(
+    ray: &Ray,
+    world: &impl Intersectable,
+    min_t: f64,
+) -> Color {
 
     if let Some(h) = hit(
-        intersect(&ray, world).as_slice(), 0.
+        intersect(&ray, world).as_slice(), min_t,
     ) {
-        let n = h.object.normal_at(ray.position(h.t));
-        return (Color::new(n.x + 1., n.y + 1., n.z + 1.)) * 0.5
+        return h.object.material
+            .scatter(ray, h)
+            .map(|Scattered{ attenuation, ray: scattered_ray }|
+                attenuation * ray_color(&scattered_ray, world, EPSILON)
+            ).unwrap_or(Color::new(0., 0., 0.))
     };
 
 
@@ -63,6 +72,10 @@ fn main() {
     world.add(Object::new_sphere().with_transform(
         translation(0., 2., 0.,)
     ));
+    world.add(Object::new_sphere().with_transform(
+        scaling(100., 100., 100.)
+        .translate(0., -101., 0.)
+    ));
 
     // Main loop
     for y_pixel in 0..IMAGE_HEIGHT {
@@ -79,11 +92,11 @@ fn main() {
                 let y_sample = rng.gen_range(y..y+pixel_height);
 
                 let ray = camera.cast_ray(x_sample, y_sample);
-                color = color + ray_color(&ray, &world);
+                color = color + ray_color(&ray, &world, 0.);
             }
             canvas.write_pixel(
                 x_pixel,
-                IMAGE_HEIGHT - y_pixel,  // Canvas uses an inverted y coordinate.
+                IMAGE_HEIGHT - 1 - y_pixel,  // Canvas uses an inverted y coordinate.
                 color * (1./SAMPLES_PER_PIXEL as f64));
         }
     }

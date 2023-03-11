@@ -1,3 +1,5 @@
+use crate::colors::Color;
+use crate::materials::Material;
 use crate::matrix::Matrix;
 use crate::tuples::Tuple;
 use crate::normal::{
@@ -12,6 +14,7 @@ pub enum Shape {
 #[derive(Debug)]
 pub struct Object {
     pub shape: Shape,
+    pub material: Box<dyn Material>,
     pub transform: Matrix,
     pub inverse_transform: Matrix,
 }
@@ -20,8 +23,16 @@ impl Object {
     pub fn new_sphere() -> Object {
         Object {
             shape: Shape::Sphere,
+            material: Default::default(),
             transform: Matrix::identity(4),
             inverse_transform: Matrix::identity(4),
+        }
+    }
+
+    pub fn with_material(self, material: Box<dyn Material>) -> Object {
+        Object {
+            material,
+            ..self
         }
     }
 

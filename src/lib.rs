@@ -10,6 +10,7 @@ pub mod object;
 pub mod normal;
 pub mod groups;
 pub mod camera;
+pub mod materials;
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
