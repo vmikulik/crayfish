@@ -1,11 +1,11 @@
 use std::f64::consts::PI;
+use std::time::{Duration, Instant};
 
 use crayfish::camera::Camera;
 use crayfish::canvas::Canvas;
 use crayfish::colors::Color;
-use crayfish::constants::EPSILON;
 use crayfish::intersection::{intersect, hit, Intersectable};
-use crayfish::materials::Scattered;
+use crayfish::materials::{Scattered, Metallic, Lambertian};
 use crayfish::object::Object;
 use crayfish::tuples::Tuple;
 use crayfish::transformations::*;
@@ -18,14 +18,20 @@ const FOV: f64 = PI / 2.;
 
 const IMAGE_HEIGHT: usize = 500;
 
-const SAMPLES_PER_PIXEL: usize = 10;
+const SAMPLES_PER_PIXEL: usize = 500;
+const MAX_SCATTER_DEPTH: usize = 20;
 
 
 fn ray_color(
     ray: &Ray,
     world: &impl Intersectable,
     min_t: f64,
+    depth: usize,
 ) -> Color {
+
+    if depth > MAX_SCATTER_DEPTH {
+        return Color::new(0., 0., 0.)
+    }
 
     if let Some(h) = hit(
         intersect(&ray, world).as_slice(), min_t,
@@ -33,7 +39,7 @@ fn ray_color(
         return h.object.material
             .scatter(ray, h)
             .map(|Scattered{ attenuation, ray: scattered_ray }|
-                attenuation * ray_color(&scattered_ray, world, 0.001)
+                attenuation * ray_color(&scattered_ray, world, 0.001, depth+1)
             ).unwrap_or(Color::new(0., 0., 0.))
     };
 
@@ -67,20 +73,33 @@ fn main() {
     // World
     let mut world = ObjectGroup::new();
     world.add(Object::new_sphere().with_transform(
-        translation(0., 0., 0.)
+        translation(0., 2., 0.,)
+    ).with_material(
+        Box::new(Lambertian::new(Color::from_u8(35, 21, 105)))
     ));
     world.add(Object::new_sphere().with_transform(
-        translation(0., 2., 0.,)
+        translation(0., 0., 0.)
+    ).with_material(
+        Box::new(Metallic::new(
+            Color::new(0.3, 0.3, 0.3,), 0.1))
     ));
     world.add(Object::new_sphere().with_transform(
         scaling(100., 100., 100.)
         .translate(0., -101., 0.)
+    ).with_material(
+        Box::new(Lambertian::new(Color::from_u8(105, 63, 21)))
     ));
 
     // Main loop
+
+    let start = Instant::now();
     for y_pixel in 0..IMAGE_HEIGHT {
         if y_pixel % 50 == 0 {
-            println!("Rendering row {} of {}", y_pixel, IMAGE_HEIGHT);
+            let duration = start.elapsed();
+            println!(
+                "Rendering row {} of {}, time elapsed: {:?}",
+                y_pixel, IMAGE_HEIGHT, duration
+            );
         }
         for x_pixel in 0..image_width {
             let y = y_pixel as f64 / IMAGE_HEIGHT as f64;
@@ -92,7 +111,7 @@ fn main() {
                 let y_sample = rng.gen_range(y..y+pixel_height);
 
                 let ray = camera.cast_ray(x_sample, y_sample);
-                color = color + ray_color(&ray, &world, 0.);
+                color = color + ray_color(&ray, &world, 0., 0);
             }
             canvas.write_pixel(
                 x_pixel,

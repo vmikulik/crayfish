@@ -2,7 +2,7 @@ use crate::{
     ray::Ray,
     intersection::Intersection,
     colors::Color,
-    tuples::Tuple,
+    tuples::Tuple, normal::reflect,
 };
 
 pub trait Material: std::fmt::Debug {
@@ -24,7 +24,7 @@ pub struct Scattered {
 
 
 #[derive(Debug)]
-struct Lambertian {
+pub struct Lambertian {
     albedo: Color,
 }
 
@@ -47,6 +47,33 @@ impl Material for Lambertian {
         Some(Scattered {
             attenuation: self.albedo,
             ray: Ray::new(hit_position, new_direction)
+        })
+    }
+}
+
+
+#[derive(Debug)]
+pub struct Metallic {
+    albedo: Color,
+    fuzz: f64,
+}
+
+impl Metallic {
+    pub fn new(albedo: Color, fuzz: f64) -> Metallic {
+        Metallic {albedo, fuzz}
+    }
+}
+
+impl Material for Metallic {
+    fn scatter(&self, ray: &Ray, hit: &Intersection) -> Option<Scattered> {
+        let position = ray.position(hit.t);
+        let normal = hit.object.normal_at(position);
+        let reflected = reflect(ray.direction, normal);
+        let mut rng = rand::thread_rng();
+        let fuzz = Tuple::random_vector_in_unit_sphere(&mut rng) * self.fuzz;
+        Some(Scattered {
+            attenuation: self.albedo,
+            ray: Ray::new(position, reflected + fuzz),
         })
     }
 }
