@@ -79,6 +79,12 @@ fn main() -> Result<(), Box<dyn Error>> {
             Color::new(0.3, 0.3, 0.3,), 0.1))
     ));
     world.add(Object::new_sphere().with_transform(
+        translation(2., 0., 0.)
+    ).with_material(
+        Box::new(Metallic::new(
+            Color::new(1., 0.3, 0.3,), 0.02))
+    ));
+    world.add(Object::new_sphere().with_transform(
         scaling(100., 100., 100.)
         .translate(0., -101., 0.)
     ).with_material(
