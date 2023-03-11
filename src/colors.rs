@@ -21,6 +21,15 @@ impl Color {
             blue: blue as f64 / u8::MAX as f64,
         }
     }
+
+    /// Converts from a linear colorspace to a Gamma=2 colorspace.
+    pub fn gamma_encode(self) -> Color {
+        Color::new(
+            self.red.sqrt(),
+            self.green.sqrt(),
+            self.blue.sqrt(),
+        )
+    }
 }
 
 

@@ -1,4 +1,3 @@
-use crate::colors::Color;
 use crate::materials::Material;
 use crate::matrix::Matrix;
 use crate::tuples::Tuple;

@@ -14,7 +14,7 @@ use crayfish::groups::ObjectGroup;
 use rand::Rng;
 
 const ASPECT_RATIO: f64 = 16./9.;
-const FOV: f64 = PI / 3.;
+const FOV: f64 = PI / 2.;
 
 const IMAGE_HEIGHT: usize = 500;
 
@@ -33,7 +33,7 @@ fn ray_color(
         return h.object.material
             .scatter(ray, h)
             .map(|Scattered{ attenuation, ray: scattered_ray }|
-                attenuation * ray_color(&scattered_ray, world, EPSILON)
+                attenuation * ray_color(&scattered_ray, world, 0.001)
             ).unwrap_or(Color::new(0., 0., 0.))
     };
 
@@ -97,7 +97,8 @@ fn main() {
             canvas.write_pixel(
                 x_pixel,
                 IMAGE_HEIGHT - 1 - y_pixel,  // Canvas uses an inverted y coordinate.
-                color * (1./SAMPLES_PER_PIXEL as f64));
+                (color * (1./SAMPLES_PER_PIXEL as f64)).gamma_encode()
+            );
         }
     }
 
