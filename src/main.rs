@@ -93,13 +93,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Main loop
 
-    let start = Instant::now();
-    for y_pixel in 0..config.image_height {
+    let start_time = Instant::now();
+    let (from_row, to_row) = config.row_range;
+    for y_pixel in from_row..to_row {
         if y_pixel % 50 == 0 {
-            let duration = start.elapsed();
+            let duration = start_time.elapsed();
             println!(
                 "Rendering row {} of {}, time elapsed: {:?}",
-                y_pixel, config.image_height, duration
+                y_pixel, to_row-from_row, duration
             );
         }
         for x_pixel in 0..canvas.width {
@@ -122,7 +123,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
-    std::fs::write("out.ppm", canvas.to_ppm())
+    let outpath = format!("{}.ppm", config.outfile);
+    std::fs::write(outpath, canvas.to_ppm())
         .expect("Unable to write file");
 
     Ok(())
