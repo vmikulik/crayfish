@@ -78,9 +78,7 @@ pub fn normal_at_sphere(obj: &Object, world_point: &Tuple) -> Tuple {
 
     // Optimisation opportunities:
     // - only matmul the non-w parts
-    // - skip creating a new matrix when transposing;
-    //   instead, just redefine matmul / indexing.
-    let mut normal = &obj.inverse_transform.transpose() / object_normal;
+    let mut normal = &obj.inverse_transform_transposed / object_normal;
     // Our implementation of translations doesn't
     // play nice with transpose, but we can just zero out
     // w to ignore this, since we know normals should be vectors :)

@@ -16,6 +16,7 @@ pub struct Object {
     pub material: Box<dyn Material>,
     pub transform: Matrix,
     pub inverse_transform: Matrix,
+    pub inverse_transform_transposed: Matrix,
 }
 
 impl Object {
@@ -25,6 +26,7 @@ impl Object {
             material: Default::default(),
             transform: Matrix::identity(4),
             inverse_transform: Matrix::identity(4),
+            inverse_transform_transposed: Matrix::identity(4),
         }
     }
 
@@ -37,9 +39,11 @@ impl Object {
 
     pub fn with_transform(self, transform: Matrix) -> Object {
         let inverse_transform = transform.inverse().unwrap();
+        let inverse_transform_transposed = inverse_transform.transpose();
         Object {
             transform,
             inverse_transform,
+            inverse_transform_transposed,
             ..self
         }
     }

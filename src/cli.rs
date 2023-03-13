@@ -5,6 +5,7 @@ pub struct Config {
     // Camera settings
     pub aspect_ratio: f64,
     pub fov_radians: f64,
+    pub aperture_radius: f64,
     // Output settings
     pub outfile: String,
     pub image_height: usize,
@@ -37,6 +38,14 @@ pub fn cli() -> clap::Command {
            .default_value("90")
            .value_parser(clap::value_parser!(f64))
            .group("camera_settings")
+        )
+        .arg(
+            clap::Arg::new("aperture_radius")
+            .long("aperture_radius")
+            .help("Aperture radius. Larger -> more depth of field.")
+            .default_value("0")
+            .value_parser(clap::value_parser!(f64))
+            .group("camera_settings")
         )
         .group(clap::ArgGroup::new("output_settings").multiple(true))
         .next_help_heading("OUTPUT SETTINGS")
@@ -99,6 +108,7 @@ pub fn make_config(matches: clap::ArgMatches) -> Result<Config, Box::<dyn Error>
     Ok(Config {
         aspect_ratio,
         fov_radians: matches.get_one::<f64>("fov").unwrap().to_radians(),
+        aperture_radius: *matches.get_one("aperture_radius").unwrap(),
         outfile: matches.get_one::<String>("outfile").unwrap().to_owned(),
         image_height,
         row_range,
@@ -121,6 +131,7 @@ mod tests {
             Config {
                 aspect_ratio: 16./9.,
                 fov_radians: std::f64::consts::PI / 2.,
+                aperture_radius: 0.,
                 outfile: "out".to_string(),
                 image_height: 100,
                 row_range: (0, 100),

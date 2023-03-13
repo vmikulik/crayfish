@@ -59,10 +59,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Camera
     let camera = Camera::new(
-        Tuple::point(0., 0., -3.),
+        Tuple::point(4., 4., -10.),
         Tuple::point(0., 0., 0.),
         config.aspect_ratio,
         config.fov_radians,
+        None,
+        config.aperture_radius,
     );
 
     // World

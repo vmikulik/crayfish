@@ -189,12 +189,24 @@ impl Tuple {
         Tuple { x, y, z, w: 1.0 }
     }
 
-    pub fn random_vector_in_unit_sphere(rng: &mut impl rand::Rng) -> Tuple {
+    pub fn random_in_unit_sphere() -> Tuple {
         loop {
-            let x = rng.gen_range(-1.0..1.0);
-            let y = rng.gen_range(-1.0..1.0);
-            let z = rng.gen_range(-1.0..1.0);
+            let x = rand::random::<f64>() * 2.0 - 1.0;
+            let y = rand::random::<f64>() * 2.0 - 1.0;
+            let z = rand::random::<f64>() * 2.0 - 1.0;
             let vec = Tuple::vector(x, y, z);
+            if vec.magnitude() < 1. {
+                return vec
+            }
+        }
+    }
+
+    /// Returns a random vector in the unit disc of the x-y plane.
+    pub fn random_in_unit_disc() -> Tuple {
+        loop {
+            let x = rand::random::<f64>() * 2.0 - 1.0;
+            let y = rand::random::<f64>() * 2.0 - 1.0;
+            let vec = Tuple::vector(x, y, 0.0);
             if vec.magnitude() < 1. {
                 return vec
             }

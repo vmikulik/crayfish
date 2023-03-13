@@ -44,8 +44,7 @@ impl Material for Lambertian {
     fn scatter(&self, ray: &Ray, hit: &Intersection) -> Option<Scattered> {
         let hit_position = ray.position(hit.t);
         let normal = hit.object.normal_at(hit_position);
-        let mut rng = rand::thread_rng();
-        let rand_vec = Tuple::random_vector_in_unit_sphere(&mut rng).unit();
+        let rand_vec = Tuple::random_in_unit_sphere().unit();
         let new_direction = match rand_vec == -normal {
             false => normal + rand_vec,
             true => normal
@@ -75,8 +74,7 @@ impl Material for Metallic {
         let position = ray.position(hit.t);
         let normal = hit.object.normal_at(position);
         let reflected = reflect(ray.direction, normal);
-        let mut rng = rand::thread_rng();
-        let fuzz = Tuple::random_vector_in_unit_sphere(&mut rng) * self.fuzz;
+        let fuzz = Tuple::random_in_unit_sphere() * self.fuzz;
         Some(Scattered::new(
             self.albedo,
             Ray::new(position, reflected + fuzz),
