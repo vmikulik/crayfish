@@ -1,10 +1,11 @@
-use crate::{object::Object, tuples::Tuple};
+use crate::{object::Object, tuples::Tuple, eq};
 
 
 /// Reflects vector `v` in a surface with `normal`.
 ///
 /// Assumes `normal` is a unit vector.
 pub fn reflect(incoming: Tuple, normal: Tuple) -> Tuple {
+    debug_assert!(incoming.dot(&normal) < 0.);
     incoming - normal * 2.0 * incoming.dot(&normal)
 }
 
@@ -44,6 +45,27 @@ mod reflection_tests {
         }
 
     }
+}
+
+/// Compute the refracted continuation of the incoming ray.
+///
+/// Assumes both input vectors are unit vectors.
+/// the nfrom_over_nto is the ratio nf/nt
+/// where nf is the refractive index of the old material
+/// and nt is the refractive index of the new material.
+pub fn refract(
+    incoming: &Tuple,
+    normal: Tuple,
+    nfrom_over_nto: f64,
+) -> Tuple {
+    debug_assert!(eq(incoming.magnitude_squared(), 1.));
+    debug_assert!(eq(normal.magnitude_squared(), 1.));
+    debug_assert!(incoming.dot(&normal) < 0.);
+    let cos_theta = -incoming.dot(&normal).min(1.);
+
+    let out_perp = (incoming + normal * cos_theta) * nfrom_over_nto;
+    let out_parallel = normal * -((1.-out_perp.magnitude_squared()).abs().sqrt());
+    out_perp + out_parallel
 }
 
 

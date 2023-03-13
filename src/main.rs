@@ -6,7 +6,7 @@ use crayfish::canvas::Canvas;
 use crayfish::cli::{make_config, cli, Config};
 use crayfish::colors::Color;
 use crayfish::intersection::{intersect, hit, Intersectable};
-use crayfish::materials::{Scattered, Metallic, Lambertian};
+use crayfish::materials::{Scattered, Metallic, Lambertian, Dielectric};
 use crayfish::object::Object;
 use crayfish::tuples::Tuple;
 use crayfish::transformations::*;
@@ -75,9 +75,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     world.add(Object::new_sphere().with_transform(
         translation(0., 0., 0.)
     ).with_material(
-        Box::new(Metallic::new(
-            Color::new(0.3, 0.3, 0.3,), 0.1))
+        Box::new(Dielectric::new(1.52))
     ));
+    // .with_material(
+    //     Box::new(Metallic::new(
+    //         Color::new(0.3, 0.3, 0.3,), 0.1))
+    // ));
     world.add(Object::new_sphere().with_transform(
         translation(2., 0., 0.)
     ).with_material(
@@ -96,7 +99,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let start_time = Instant::now();
     let (from_row, to_row) = config.row_range;
     for y_pixel in from_row..to_row {
-        if y_pixel % 50 == 0 {
+        if y_pixel % 1 == 0 {
             let duration = start_time.elapsed();
             println!(
                 "Rendering row {} of {}, time elapsed: {:?}",
@@ -113,7 +116,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let y_sample = rng.gen_range(y..y+pixel_height);
 
                 let ray = camera.cast_ray(x_sample, y_sample);
-                color = color + ray_color(&ray, &world, 0., 0, &config);
+                let sample = ray_color(&ray, &world, 0., 0, &config);
+                color = color + sample;
             }
             canvas.write_pixel(
                 x_pixel,

@@ -4,3 +4,5 @@
 #
 # It is recommended to check this file in to source control so that
 # everyone who runs the test benefits from these saved cases.
+cc 27ef05bf2b18f3e9cf14156de231d44c68973c8cc9fa5f6e871172a28200e1a3 # shrinks to normal = Tuple { x: 0.0, y: 0.0, z: 1.0, w: 0.0 }, incoming = Tuple { x: 0.0, y: 0.0, z: -48.035637554937296, w: 0.0 }
+cc 0a428245cf7f2ce38c37f9b95d55773ab3f6143d669385dd6c19f31486dc24d6 # shrinks to normal = Tuple { x: 0.0, y: 0.0, z: -1.0, w: 0.0 }, incoming = Tuple { x: 0.0, y: 0.0, z: 78.00795716080007, w: 0.0 }
