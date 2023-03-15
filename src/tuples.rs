@@ -1,20 +1,49 @@
 use crate::constants::EPSILON;
 
+
+/// This trait only exists to permit Tuple::new()
+/// to be generic. It seems very hacky, and there must
+/// be a better way, but it is what it is.
+pub trait TupleType<K> {
+    fn make_tuple(x: f64, y: f64, z: f64) -> Tuple<K>;
+}
+
 #[derive(Debug, Clone, Copy)]
-pub struct Tuple {
+pub struct Vector();
+
+impl TupleType<Vector> for Vector {
+    fn make_tuple(x: f64, y: f64, z: f64) -> Tuple<Vector> {
+        Tuple::vector(x, y, z)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Point();
+
+impl TupleType<Point> for Point {
+    fn make_tuple(x: f64, y: f64, z: f64) -> Tuple<Point> {
+        Tuple::point(x, y, z)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Tuple<Kind> {
     pub x: f64,
     pub y: f64,
     pub z: f64,
     pub w: f64,
+    kind: std::marker::PhantomData<Kind>,
 }
 
 #[cfg(test)]
 pub mod proptest_strategies {
     use proptest::prelude::*;
     use super::Tuple;
+    use super::Vector;
+    use super::Point;
 
     /// Strategy for vectors with given maximum values.
-    pub fn vector(max_val: f64) -> impl Strategy<Value = Tuple> {
+    pub fn vector(max_val: f64) -> impl Strategy<Value = Tuple<Vector>> {
         (
             -max_val..max_val,
             -max_val..max_val,
@@ -25,7 +54,7 @@ pub mod proptest_strategies {
     }
 
     /// Strategy for points with given maximum values.
-    pub fn point(max_val: f64) -> impl Strategy<Value = Tuple> {
+    pub fn point(max_val: f64) -> impl Strategy<Value = Tuple<Point>> {
         (
             -max_val..max_val,
             -max_val..max_val,
@@ -36,8 +65,8 @@ pub mod proptest_strategies {
     }
 }
 
-impl std::cmp::PartialEq for Tuple {
-    fn eq(&self, _rhs: &Tuple) -> bool {
+impl<K> std::cmp::PartialEq for Tuple<K> {
+    fn eq(&self, _rhs: &Tuple<K>) -> bool {
         (self.x - _rhs.x).abs() < EPSILON
         && (self.y - _rhs.y).abs() < EPSILON
         && (self.z - _rhs.z).abs() < EPSILON
@@ -45,151 +74,280 @@ impl std::cmp::PartialEq for Tuple {
     }
 }
 
-impl std::ops::Add<&Tuple> for &Tuple {
-    type Output = Tuple;
+// Vector + Vector = Vector
+impl std::ops::Add<&Tuple<Vector>> for &Tuple<Vector> {
+    type Output = Tuple<Vector>;
 
-    fn add(self, _rhs: &Tuple) -> Tuple {
+    fn add(self, _rhs: &Tuple<Vector>) -> Tuple<Vector> {
         Tuple {
             x: self.x + _rhs.x,
             y: self.y + _rhs.y,
             z: self.z + _rhs.z,
             w: self.w + _rhs.w,
+            kind: std::marker::PhantomData::<Vector>,
         }
     }
 }
-impl std::ops::Add<Tuple> for &Tuple {
-    type Output = Tuple;
-    fn add(self, _rhs: Tuple) -> Tuple {
+impl std::ops::Add<Tuple<Vector>> for &Tuple<Vector> {
+    type Output = Tuple<Vector>;
+    fn add(self, _rhs: Tuple<Vector>) -> Tuple<Vector> {
         self + &_rhs
     }
 }
-impl std::ops::Add<&Tuple> for Tuple {
-    type Output = Tuple;
-    fn add(self, _rhs: &Tuple) -> Tuple {
+impl std::ops::Add<&Tuple<Vector>> for Tuple<Vector> {
+    type Output = Tuple<Vector>;
+    fn add(self, _rhs: &Tuple<Vector>) -> Tuple<Vector> {
         &self + _rhs
     }
 }
-impl std::ops::Add<Tuple> for Tuple {
-    type Output = Tuple;
-    fn add(self, _rhs: Tuple) -> Tuple {
+impl std::ops::Add<Tuple<Vector>> for Tuple<Vector> {
+    type Output = Tuple<Vector>;
+    fn add(self, _rhs: Tuple<Vector>) -> Tuple<Vector> {
         &self + &_rhs
     }
 }
 
 
+// Point + Vector = Point
+impl std::ops::Add<&Tuple<Vector>> for &Tuple<Point> {
+    type Output = Tuple<Point>;
 
-impl std::ops::Sub<&Tuple> for &Tuple {
-    type Output = Tuple;
+    fn add(self, _rhs: &Tuple<Vector>) -> Tuple<Point> {
+        Tuple {
+            x: self.x + _rhs.x,
+            y: self.y + _rhs.y,
+            z: self.z + _rhs.z,
+            w: self.w + _rhs.w,
+            kind: std::marker::PhantomData::<Point>,
+        }
+    }
+}
+impl std::ops::Add<Tuple<Vector>> for &Tuple<Point> {
+    type Output = Tuple<Point>;
+    fn add(self, _rhs: Tuple<Vector>) -> Tuple<Point> {
+        self + &_rhs
+    }
+}
+impl std::ops::Add<&Tuple<Vector>> for Tuple<Point> {
+    type Output = Tuple<Point>;
+    fn add(self, _rhs: &Tuple<Vector>) -> Tuple<Point> {
+        &self + _rhs
+    }
+}
+impl std::ops::Add<Tuple<Vector>> for Tuple<Point> {
+    type Output = Tuple<Point>;
+    fn add(self, _rhs: Tuple<Vector>) -> Tuple<Point> {
+        &self + &_rhs
+    }
+}
 
-    fn sub(self, _rhs: &Tuple) -> Tuple {
+// Vector + Point = Point
+impl std::ops::Add<&Tuple<Point>> for &Tuple<Vector> {
+    type Output = Tuple<Point>;
+
+    fn add(self, _rhs: &Tuple<Point>) -> Tuple<Point> {
+        Tuple {
+            x: self.x + _rhs.x,
+            y: self.y + _rhs.y,
+            z: self.z + _rhs.z,
+            w: self.w + _rhs.w,
+            kind: std::marker::PhantomData::<Point>,
+        }
+    }
+}
+impl std::ops::Add<Tuple<Point>> for &Tuple<Vector> {
+    type Output = Tuple<Point>;
+    fn add(self, _rhs: Tuple<Point>) -> Tuple<Point> {
+        self + &_rhs
+    }
+}
+impl std::ops::Add<&Tuple<Point>> for Tuple<Vector> {
+    type Output = Tuple<Point>;
+    fn add(self, _rhs: &Tuple<Point>) -> Tuple<Point> {
+        &self + _rhs
+    }
+}
+impl std::ops::Add<Tuple<Point>> for Tuple<Vector> {
+    type Output = Tuple<Point>;
+    fn add(self, _rhs: Tuple<Point>) -> Tuple<Point> {
+        &self + &_rhs
+    }
+}
+
+// Vector - Vector = Vector
+impl std::ops::Sub<&Tuple<Vector>> for &Tuple<Vector> {
+    type Output = Tuple<Vector>;
+
+    fn sub(self, _rhs: &Tuple<Vector>) -> Tuple<Vector> {
         Tuple {
             x: self.x - _rhs.x,
             y: self.y - _rhs.y,
             z: self.z - _rhs.z,
             w: self.w - _rhs.w,
+            kind: std::marker::PhantomData::<Vector>,
         }
     }
 }
-impl std::ops::Sub<Tuple> for &Tuple {
-    type Output = Tuple;
-    fn sub(self, _rhs: Tuple) -> Tuple {
+impl std::ops::Sub<Tuple<Vector>> for &Tuple<Vector> {
+    type Output = Tuple<Vector>;
+    fn sub(self, _rhs: Tuple<Vector>) -> Tuple<Vector> {
         self - &_rhs
     }
 }
-impl std::ops::Sub<&Tuple> for Tuple {
-    type Output = Tuple;
-    fn sub(self, _rhs: &Tuple) -> Tuple {
+impl std::ops::Sub<&Tuple<Vector>> for Tuple<Vector> {
+    type Output = Tuple<Vector>;
+    fn sub(self, _rhs: &Tuple<Vector>) -> Tuple<Vector> {
         &self - _rhs
     }
 }
-impl std::ops::Sub<Tuple> for Tuple {
-    type Output = Tuple;
-    fn sub(self, _rhs: Tuple) -> Tuple {
+impl std::ops::Sub<Tuple<Vector>> for Tuple<Vector> {
+    type Output = Tuple<Vector>;
+    fn sub(self, _rhs: Tuple<Vector>) -> Tuple<Vector> {
         &self - &_rhs
     }
 }
 
+// Point - Point = Vector
+impl std::ops::Sub<&Tuple<Point>> for &Tuple<Point> {
+    type Output = Tuple<Vector>;
 
-impl std::ops::Neg for &Tuple {
-    type Output = Tuple;
+    fn sub(self, _rhs: &Tuple<Point>) -> Tuple<Vector> {
+        Tuple {
+            x: self.x - _rhs.x,
+            y: self.y - _rhs.y,
+            z: self.z - _rhs.z,
+            w: self.w - _rhs.w,
+            kind: std::marker::PhantomData::<Vector>,
+        }
+    }
+}
+impl std::ops::Sub<Tuple<Point>> for &Tuple<Point> {
+    type Output = Tuple<Vector>;
+    fn sub(self, _rhs: Tuple<Point>) -> Tuple<Vector> {
+        self - &_rhs
+    }
+}
+impl std::ops::Sub<&Tuple<Point>> for Tuple<Point> {
+    type Output = Tuple<Vector>;
+    fn sub(self, _rhs: &Tuple<Point>) -> Tuple<Vector> {
+        &self - _rhs
+    }
+}
+impl std::ops::Sub<Tuple<Point>> for Tuple<Point> {
+    type Output = Tuple<Vector>;
+    fn sub(self, _rhs: Tuple<Point>) -> Tuple<Vector> {
+        &self - &_rhs
+    }
+}
 
-    fn neg(self) -> Tuple {
+// Point - Vector = Point
+impl std::ops::Sub<&Tuple<Vector>> for &Tuple<Point> {
+    type Output = Tuple<Point>;
+
+    fn sub(self, _rhs: &Tuple<Vector>) -> Tuple<Point> {
+        Tuple {
+            x: self.x - _rhs.x,
+            y: self.y - _rhs.y,
+            z: self.z - _rhs.z,
+            w: self.w - _rhs.w,
+            kind: std::marker::PhantomData::<Point>,
+        }
+    }
+}
+impl std::ops::Sub<Tuple<Vector>> for &Tuple<Point> {
+    type Output = Tuple<Point>;
+    fn sub(self, _rhs: Tuple<Vector>) -> Tuple<Point> {
+        self - &_rhs
+    }
+}
+impl std::ops::Sub<&Tuple<Vector>> for Tuple<Point> {
+    type Output = Tuple<Point>;
+    fn sub(self, _rhs: &Tuple<Vector>) -> Tuple<Point> {
+        &self - _rhs
+    }
+}
+impl std::ops::Sub<Tuple<Vector>> for Tuple<Point> {
+    type Output = Tuple<Point>;
+    fn sub(self, _rhs: Tuple<Vector>) -> Tuple<Point> {
+        &self - &_rhs
+    }
+}
+
+impl<K> std::ops::Neg for &Tuple<K> {
+    type Output = Tuple<K>;
+
+    fn neg(self) -> Tuple<K> {
         Tuple {
             x: -self.x,
             y: -self.y,
             z: -self.z,
             w: -self.w,
+            kind: std::marker::PhantomData::<K>,
         }
     }
 }
-impl std::ops::Neg for Tuple {
-    type Output = Tuple;
-    fn neg(self) -> Tuple {
+impl<K> std::ops::Neg for Tuple<K> {
+    type Output = Tuple<K>;
+    fn neg(self) -> Tuple<K> {
         -&self
     }
 }
 
 
-impl std::ops::Mul<f64> for &Tuple {
-    type Output = Tuple;
+impl<K> std::ops::Mul<f64> for &Tuple<K> {
+    type Output = Tuple<K>;
 
-    fn mul(self, _rhs: f64) -> Tuple {
+    fn mul(self, _rhs: f64) -> Tuple<K> {
         Tuple {
             x: self.x * _rhs,
             y: self.y * _rhs,
             z: self.z * _rhs,
             w: self.w * _rhs,
+            kind: std::marker::PhantomData::<K>,
         }
     }
 }
 
 
-impl std::ops::Mul<f64> for Tuple {
-    type Output = Tuple;
+impl<K> std::ops::Mul<f64> for Tuple<K> {
+    type Output = Tuple<K>;
 
-    fn mul(self, _rhs: f64) -> Tuple {
+    fn mul(self, _rhs: f64) -> Tuple<K> {
         &self * _rhs
     }
 }
 
 
-impl std::ops::Div<f64> for &Tuple {
-    type Output = Tuple;
+impl<K> std::ops::Div<f64> for &Tuple<K> {
+    type Output = Tuple<K>;
 
-    fn div(self, _rhs: f64) -> Tuple {
+    fn div(self, _rhs: f64) -> Tuple<K> {
         Tuple {
             x: self.x / _rhs,
             y: self.y / _rhs,
             z: self.z / _rhs,
             w: self.w / _rhs,
+            kind: std::marker::PhantomData::<K>,
         }
     }
 }
 
 
-impl std::ops::Div<f64> for Tuple {
-    type Output = Tuple;
+impl<K> std::ops::Div<f64> for Tuple<K> {
+    type Output = Tuple<K>;
 
-    fn div(self, _rhs: f64) -> Tuple {
+    fn div(self, _rhs: f64) -> Tuple<K> {
         &self / _rhs
     }
 }
 
 
-impl Tuple {
-    pub fn new(x: f64, y: f64, z: f64, w: f64) -> Tuple {
-        Tuple { x, y, z, w }
+impl Tuple<Vector> {
+    pub fn vector(x: f64, y: f64, z: f64) -> Tuple<Vector> {
+        Tuple { x, y, z, w: 0.0, kind: std::marker::PhantomData::<Vector> }
     }
 
-    pub fn vector(x: f64, y: f64, z: f64) -> Tuple {
-        Tuple { x, y, z, w: 0.0 }
-    }
-
-    pub fn point(x: f64, y: f64, z: f64) -> Tuple {
-        Tuple { x, y, z, w: 1.0 }
-    }
-
-    pub fn random_in_unit_sphere() -> Tuple {
+    pub fn random_in_unit_sphere() -> Tuple<Vector> {
         loop {
             let x = rand::random::<f64>() * 2.0 - 1.0;
             let y = rand::random::<f64>() * 2.0 - 1.0;
@@ -202,7 +360,7 @@ impl Tuple {
     }
 
     /// Returns a random vector in the unit disc of the x-y plane.
-    pub fn random_in_unit_disc() -> Tuple {
+    pub fn random_in_unit_disc() -> Tuple<Vector> {
         loop {
             let x = rand::random::<f64>() * 2.0 - 1.0;
             let y = rand::random::<f64>() * 2.0 - 1.0;
@@ -213,14 +371,6 @@ impl Tuple {
         }
     }
 
-    pub fn is_vector(&self) -> bool {
-        self.w == 0.0
-    }
-
-    pub fn is_point(&self) -> bool {
-        self.w == 1.0
-    }
-
     pub fn magnitude_squared(&self) -> f64 {
         self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)
     }
@@ -229,11 +379,11 @@ impl Tuple {
         self.magnitude_squared().sqrt()
     }
 
-    pub fn unit(&self) -> Tuple {
+    pub fn unit(&self) -> Tuple<Vector> {
         self / self.magnitude()
     }
 
-    pub fn cross(&self, _rhs: &Tuple) -> Tuple {
+    pub fn cross(&self, _rhs: &Tuple<Vector>) -> Tuple<Vector> {
         Tuple::vector(
             self.y * _rhs.z - self.z * _rhs.y,
             self.z * _rhs.x - self.x * _rhs.z,
@@ -241,8 +391,30 @@ impl Tuple {
         )
     }
 
-    pub fn dot(&self, _rhs: &Tuple) -> f64 {
+    pub fn dot(&self, _rhs: &Tuple<Vector>) -> f64 {
         self.x * _rhs.x + self.y * _rhs.y + self.z * _rhs.z + self.w * _rhs.w
+    }
+}
+
+
+impl Tuple<Point> {
+    pub fn point(x: f64, y: f64, z: f64) -> Tuple<Point> {
+        Tuple { x, y, z, w: 1.0, kind: std::marker::PhantomData::<Point> }
+    }
+}
+
+
+impl<K: TupleType<K>> Tuple<K> {
+    pub fn new(x: f64, y: f64, z: f64) -> Tuple<K> {
+        K::make_tuple(x, y, z)
+    }
+
+    pub fn is_vector(&self) -> bool {
+        self.w == 0.0
+    }
+
+    pub fn is_point(&self) -> bool {
+        self.w == 1.0
     }
 
     pub fn as_array(&self) -> [f64; 4] {
@@ -262,35 +434,6 @@ mod tests {
 
 
     proptest! {
-        #[test]
-        fn tuple_with_w1_is_a_point(
-            x in any::<f64>(),
-            y in any::<f64>(),
-            z in any::<f64>(),
-        ) {
-            let a  = Tuple::new(x, y, z, 1.0);
-            assert!(a.is_point());
-            assert!(!a.is_vector());
-            assert_eq!(a.x, x);
-            assert_eq!(a.y, y);
-            assert_eq!(a.z, z);
-            assert_eq!(a.w, 1.0);
-        }
-
-        #[test]
-        fn tuple_with_w0_is_a_vector(
-            x in any::<f64>(),
-            y in any::<f64>(),
-            z in any::<f64>(),
-        ) {
-            let a  = Tuple::new(x, y, z, 0.0);
-            assert!(!a.is_point());
-            assert!(a.is_vector());
-            assert_eq!(a.x, x);
-            assert_eq!(a.y, y);
-            assert_eq!(a.z, z);
-            assert_eq!(a.w, 0.0);
-        }
 
         #[test]
         fn vector_constructor_returns_a_vector(
@@ -298,9 +441,8 @@ mod tests {
             y in any::<f64>(),
             z in any::<f64>(),
         ) {
-            let a = Tuple::new(x, y, z, 0.0);
-            let b = Tuple::vector(x, y, z);
-            assert_eq!(a, b);
+            let a = Tuple::vector(x, y, z);
+            assert!(a.is_vector());
         }
 
         #[test]
@@ -309,9 +451,8 @@ mod tests {
             y in any::<f64>(),
             z in any::<f64>(),
         ) {
-            let a = Tuple::new(x, y, z, 1.0);
-            let b = Tuple::point(x, y, z);
-            assert_eq!(a, b);
+            let a = Tuple::point(x, y, z);
+            assert!(a.is_point());
         }
 
         #[test]
@@ -342,14 +483,14 @@ mod tests {
         }
 
         #[test]
-        fn negating_tuple(
+        fn negating_vector(
             x in any::<f64>(),
             y in any::<f64>(),
             z in any::<f64>(),
             w in any::<f64>(),
         ) {
-            let a = Tuple::new(x, y, z, w);
-            let b = Tuple::new(-x, -y, -z, -w);
+            let a = Tuple::vector(x, y, z);
+            let b = Tuple::vector(-x, -y, -z);
             assert_eq!(-a, b);
         }
 
@@ -374,16 +515,16 @@ mod tests {
 
 
     #[test]
-    fn multiplying_tuple_by_scalar() {
-        let a = Tuple::new(1., -2., 3., -4.);
-        let b = Tuple::new(3.5, -7., 10.5, -14.);
+    fn multiplying_vector_by_scalar() {
+        let a = Tuple::vector(1., -2., 3.);
+        let b = Tuple::vector(3.5, -7., 10.5);
         assert_eq!(a * 3.5, b);
     }
 
     #[test]
-    fn dividing_tuple_by_scalar() {
-        let a = Tuple::new(1., -2., 3., -4.);
-        let b = Tuple::new(0.5, -1., 1.5, -2.);
+    fn dividing_vector_by_scalar() {
+        let a = Tuple::vector(1., -2., 3.);
+        let b = Tuple::vector(0.5, -1., 1.5);
         assert_eq!(a / 2., b);
     }
 

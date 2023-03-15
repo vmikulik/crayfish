@@ -1,14 +1,14 @@
-use crate::tuples::Tuple;
+use crate::tuples::{Tuple, Point, Vector};
 use crate::matrix::Matrix;
 
 #[derive(Debug)]
 pub struct Ray {
-    pub origin: Tuple,    // Point
-    pub direction: Tuple, // Vector
+    pub origin: Tuple<Point>,
+    pub direction: Tuple<Vector>,
 }
 
 impl Ray {
-    pub fn new(origin: Tuple, direction: Tuple) -> Ray {
+    pub fn new(origin: Tuple<Point>, direction: Tuple<Vector>) -> Ray {
         Ray { origin, direction }
     }
 
@@ -26,7 +26,7 @@ impl Ray {
         }
     }
 
-    pub fn position(&self, t: f64) -> Tuple {
+    pub fn position(&self, t: f64) -> Tuple<Point> {
         &self.origin + &self.direction * t
     }
 

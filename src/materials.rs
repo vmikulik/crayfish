@@ -73,7 +73,7 @@ impl Material for Metallic {
     fn scatter(&self, ray: &Ray, hit: &Intersection) -> Option<Scattered> {
         let position = ray.position(hit.t);
         let normal = hit.object.normal_at(position);
-        let reflected = reflect(ray.direction, normal);
+        let reflected = reflect(&ray.direction, &normal);
         let fuzz = Tuple::random_in_unit_sphere() * self.fuzz;
         Some(Scattered::new(
             self.albedo,
@@ -122,7 +122,7 @@ impl Material for Dielectric {
         let should_reflect = Dielectric::schlick_reflectance(
             cos_theta, nfrom_over_nto) > rng.gen_range(0.0..1.0);
         let direction = if cannot_refract || should_reflect {
-            reflect(incoming, normal)
+            reflect(&incoming, &normal)
         } else {
             refract(&incoming, normal, nfrom_over_nto)
         };

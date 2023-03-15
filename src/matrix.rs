@@ -1,6 +1,6 @@
 use crate::Result;
 use crate::constants::EPSILON;
-use crate::tuples::Tuple;
+use crate::tuples::{Tuple, TupleType};
 use crate::eq;
 
 #[derive(Debug, Clone)]
@@ -29,19 +29,19 @@ impl std::ops::Div<Matrix> for Matrix {
 }
 
 /// `/` means Matrix multiplication.
-impl std::ops::Div<&Tuple> for Matrix {
-    type Output = Tuple;
+impl<K: TupleType<K>> std::ops::Div<&Tuple<K>> for Matrix {
+    type Output = Tuple<K>;
 
-    fn div(self, _rhs: &Tuple) -> Tuple {
+    fn div(self, _rhs: &Tuple<K>) -> Tuple<K> {
         self.matmul_t(_rhs).unwrap()
     }
 }
 
 /// `/` means Matrix multiplication.
-impl std::ops::Div<Tuple> for Matrix {
-    type Output = Tuple;
+impl<K: TupleType<K>> std::ops::Div<Tuple<K>> for Matrix {
+    type Output = Tuple<K>;
 
-    fn div(self, _rhs: Tuple) -> Tuple {
+    fn div(self, _rhs: Tuple<K>) -> Tuple<K> {
         self.matmul_t(&_rhs).unwrap()
     }
 }
@@ -65,19 +65,19 @@ impl std::ops::Div<Matrix> for &Matrix {
 }
 
 /// `/` means Matrix multiplication.
-impl std::ops::Div<&Tuple> for &Matrix {
-    type Output = Tuple;
+impl<K: TupleType<K>> std::ops::Div<&Tuple<K>> for &Matrix {
+    type Output = Tuple<K>;
 
-    fn div(self, _rhs: &Tuple) -> Tuple {
+    fn div(self, _rhs: &Tuple<K>) -> Tuple<K> {
         self.matmul_t(_rhs).unwrap()
     }
 }
 
 /// `/` means Matrix multiplication.
-impl std::ops::Div<Tuple> for &Matrix {
-    type Output = Tuple;
+impl<K: TupleType<K>> std::ops::Div<Tuple<K>> for &Matrix {
+    type Output = Tuple<K>;
 
-    fn div(self, _rhs: Tuple) -> Tuple {
+    fn div(self, _rhs: Tuple<K>) -> Tuple<K> {
         self.matmul_t(&_rhs).unwrap()
     }
 }
@@ -191,7 +191,7 @@ impl Matrix {
         Ok(result)
     }
 
-    pub fn matmul_t(&self, _rhs: &Tuple) -> Result<Tuple> {
+    pub fn matmul_t<K: TupleType<K>>(&self, _rhs: &Tuple<K>) -> Result<Tuple<K>> {
         if self.width != 4 || self.height != 4 {
             return Err("Matrix must be 4x4".into());
         }
@@ -207,7 +207,6 @@ impl Matrix {
             out[0],
             out[1],
             out[2],
-            out[3],
         ))
     }
 
@@ -316,8 +315,8 @@ mod tests {
             vec![8., 6., 4., 1.],
             vec![0., 0., 0., 1.]
         ])?;
-        let b = Tuple::new(1., 2., 3., 1.);
-        let c = Tuple::new(18., 24., 33., 1.);
+        let b = Tuple::point(1., 2., 3.);
+        let c = Tuple::point(18., 24., 33.);
         assert_eq!(a.matmul_t(&b)?, c);
         Ok(())
     }

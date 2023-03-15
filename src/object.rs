@@ -1,6 +1,6 @@
 use crate::materials::Material;
 use crate::matrix::Matrix;
-use crate::tuples::Tuple;
+use crate::tuples::{Tuple, Point, Vector};
 use crate::normal::{
     normal_at_sphere
 };
@@ -48,7 +48,7 @@ impl Object {
         }
     }
 
-    pub fn normal_at(&self, position: Tuple) -> Tuple {
+    pub fn normal_at(&self, position: Tuple<Point>) -> Tuple<Vector> {
         match self.shape {
             Shape::Sphere => normal_at_sphere(&self, &position)
         }

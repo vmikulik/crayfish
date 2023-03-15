@@ -1,10 +1,10 @@
-use crate::{object::Object, tuples::Tuple, eq};
+use crate::{object::Object, tuples::{Tuple, Vector, Point}, eq};
 
 
 /// Reflects vector `v` in a surface with `normal`.
 ///
 /// Assumes `normal` is a unit vector.
-pub fn reflect(incoming: Tuple, normal: Tuple) -> Tuple {
+pub fn reflect(incoming: &Tuple<Vector>, normal: &Tuple<Vector>) -> Tuple<Vector> {
     debug_assert!(incoming.dot(&normal) < 0.);
     incoming - normal * 2.0 * incoming.dot(&normal)
 }
@@ -27,7 +27,7 @@ mod reflection_tests {
         ) {
             prop_assume!(normal.dot(&incoming) < 0.);
             assert!(eq(
-                reflect(incoming, normal).magnitude(),
+                reflect(&incoming, &normal).magnitude(),
                 incoming.magnitude()
             ))
         }
@@ -39,7 +39,7 @@ mod reflection_tests {
         ) {
             prop_assume!(normal.dot(&incoming) < 0.);
             assert!(eq(
-                reflect(incoming, normal).dot(&normal),
+                reflect(&incoming, &normal).dot(&normal),
                 -incoming.dot(&normal)
             ))
         }
@@ -54,10 +54,10 @@ mod reflection_tests {
 /// where nf is the refractive index of the old material
 /// and nt is the refractive index of the new material.
 pub fn refract(
-    incoming: &Tuple,
-    normal: Tuple,
+    incoming: &Tuple<Vector>,
+    normal: Tuple<Vector>,
     nfrom_over_nto: f64,
-) -> Tuple {
+) -> Tuple<Vector> {
     debug_assert!(eq(incoming.magnitude_squared(), 1.));
     debug_assert!(eq(normal.magnitude_squared(), 1.));
     debug_assert!(incoming.dot(&normal) < 0.);
@@ -69,7 +69,7 @@ pub fn refract(
 }
 
 
-pub fn normal_at_sphere(obj: &Object, world_point: &Tuple) -> Tuple {
+pub fn normal_at_sphere(obj: &Object, world_point: &Tuple<Point>) -> Tuple<Vector> {
     let object_point = &obj.inverse_transform / world_point;
     let object_normal = object_point - Tuple::point(0., 0., 0.);
     // The correct transformation for normals isn't what you expect!

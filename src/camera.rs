@@ -1,19 +1,19 @@
-use crate::{tuples::Tuple, ray::Ray};
+use crate::{tuples::{Tuple, Point, Vector}, ray::Ray};
 
 pub struct Camera {
-    pub origin: Tuple,
-    pub horizontal: Tuple,
-    pub vertical: Tuple,
-    pub lower_left_corner: Tuple,
+    pub origin: Tuple<Point>,
+    pub horizontal: Tuple<Vector>,
+    pub vertical: Tuple<Vector>,
+    pub lower_left_corner: Tuple<Point>,
     aperture_radius: f64,
-    u_horizontal: Tuple,
-    u_vertical: Tuple,
+    u_horizontal: Tuple<Vector>,
+    u_vertical: Tuple<Vector>,
 }
 
 impl Camera {
     pub fn new(
-        lookfrom: Tuple,
-        lookat: Tuple,
+        lookfrom: Tuple<Point>,
+        lookat: Tuple<Point>,
         aspect_ratio: f64,
         fov_radians: f64,
         focus_distance: Option<f64>, // if None, use |lookfrom - lookat|
