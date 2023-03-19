@@ -6,6 +6,7 @@ use crate::constants::EPSILON;
 /// be a better way, but it is what it is.
 pub trait TupleType<K> {
     fn make_tuple(x: f64, y: f64, z: f64) -> Tuple<K>;
+    fn as_array(t: &Tuple<K>) -> [f64; 4];
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -14,6 +15,10 @@ pub struct Vector();
 impl TupleType<Vector> for Vector {
     fn make_tuple(x: f64, y: f64, z: f64) -> Tuple<Vector> {
         Tuple::vector(x, y, z)
+    }
+
+    fn as_array(t: &Tuple<Vector>) -> [f64; 4] {
+        [t.x, t.y, t.z, 0.0]
     }
 }
 
@@ -24,6 +29,10 @@ impl TupleType<Point> for Point {
     fn make_tuple(x: f64, y: f64, z: f64) -> Tuple<Point> {
         Tuple::point(x, y, z)
     }
+
+    fn as_array(t: &Tuple<Point>) -> [f64; 4] {
+        [t.x, t.y, t.z, 1.0]
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -31,7 +40,6 @@ pub struct Tuple<Kind> {
     pub x: f64,
     pub y: f64,
     pub z: f64,
-    pub w: f64,
     kind: std::marker::PhantomData<Kind>,
 }
 
@@ -70,7 +78,6 @@ impl<K> std::cmp::PartialEq for Tuple<K> {
         (self.x - _rhs.x).abs() < EPSILON
         && (self.y - _rhs.y).abs() < EPSILON
         && (self.z - _rhs.z).abs() < EPSILON
-        && (self.w - _rhs.w).abs() < EPSILON
     }
 }
 
@@ -83,7 +90,6 @@ impl std::ops::Add<&Tuple<Vector>> for &Tuple<Vector> {
             x: self.x + _rhs.x,
             y: self.y + _rhs.y,
             z: self.z + _rhs.z,
-            w: self.w + _rhs.w,
             kind: std::marker::PhantomData::<Vector>,
         }
     }
@@ -117,7 +123,6 @@ impl std::ops::Add<&Tuple<Vector>> for &Tuple<Point> {
             x: self.x + _rhs.x,
             y: self.y + _rhs.y,
             z: self.z + _rhs.z,
-            w: self.w + _rhs.w,
             kind: std::marker::PhantomData::<Point>,
         }
     }
@@ -150,7 +155,6 @@ impl std::ops::Add<&Tuple<Point>> for &Tuple<Vector> {
             x: self.x + _rhs.x,
             y: self.y + _rhs.y,
             z: self.z + _rhs.z,
-            w: self.w + _rhs.w,
             kind: std::marker::PhantomData::<Point>,
         }
     }
@@ -183,7 +187,6 @@ impl std::ops::Sub<&Tuple<Vector>> for &Tuple<Vector> {
             x: self.x - _rhs.x,
             y: self.y - _rhs.y,
             z: self.z - _rhs.z,
-            w: self.w - _rhs.w,
             kind: std::marker::PhantomData::<Vector>,
         }
     }
@@ -216,7 +219,6 @@ impl std::ops::Sub<&Tuple<Point>> for &Tuple<Point> {
             x: self.x - _rhs.x,
             y: self.y - _rhs.y,
             z: self.z - _rhs.z,
-            w: self.w - _rhs.w,
             kind: std::marker::PhantomData::<Vector>,
         }
     }
@@ -249,7 +251,6 @@ impl std::ops::Sub<&Tuple<Vector>> for &Tuple<Point> {
             x: self.x - _rhs.x,
             y: self.y - _rhs.y,
             z: self.z - _rhs.z,
-            w: self.w - _rhs.w,
             kind: std::marker::PhantomData::<Point>,
         }
     }
@@ -281,7 +282,6 @@ impl<K> std::ops::Neg for &Tuple<K> {
             x: -self.x,
             y: -self.y,
             z: -self.z,
-            w: -self.w,
             kind: std::marker::PhantomData::<K>,
         }
     }
@@ -302,7 +302,6 @@ impl<K> std::ops::Mul<f64> for &Tuple<K> {
             x: self.x * _rhs,
             y: self.y * _rhs,
             z: self.z * _rhs,
-            w: self.w * _rhs,
             kind: std::marker::PhantomData::<K>,
         }
     }
@@ -326,7 +325,6 @@ impl<K> std::ops::Div<f64> for &Tuple<K> {
             x: self.x / _rhs,
             y: self.y / _rhs,
             z: self.z / _rhs,
-            w: self.w / _rhs,
             kind: std::marker::PhantomData::<K>,
         }
     }
@@ -344,7 +342,7 @@ impl<K> std::ops::Div<f64> for Tuple<K> {
 
 impl Tuple<Vector> {
     pub fn vector(x: f64, y: f64, z: f64) -> Tuple<Vector> {
-        Tuple { x, y, z, w: 0.0, kind: std::marker::PhantomData::<Vector> }
+        Tuple { x, y, z, kind: std::marker::PhantomData::<Vector> }
     }
 
     pub fn random_in_unit_sphere() -> Tuple<Vector> {
@@ -372,7 +370,7 @@ impl Tuple<Vector> {
     }
 
     pub fn magnitude_squared(&self) -> f64 {
-        self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)
+        self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }
 
     pub fn magnitude(&self) -> f64 {
@@ -392,14 +390,15 @@ impl Tuple<Vector> {
     }
 
     pub fn dot(&self, _rhs: &Tuple<Vector>) -> f64 {
-        self.x * _rhs.x + self.y * _rhs.y + self.z * _rhs.z + self.w * _rhs.w
+        self.x * _rhs.x + self.y * _rhs.y + self.z * _rhs.z
     }
+
 }
 
 
 impl Tuple<Point> {
     pub fn point(x: f64, y: f64, z: f64) -> Tuple<Point> {
-        Tuple { x, y, z, w: 1.0, kind: std::marker::PhantomData::<Point> }
+        Tuple { x, y, z, kind: std::marker::PhantomData::<Point> }
     }
 }
 
@@ -409,18 +408,9 @@ impl<K: TupleType<K>> Tuple<K> {
         K::make_tuple(x, y, z)
     }
 
-    pub fn is_vector(&self) -> bool {
-        self.w == 0.0
-    }
-
-    pub fn is_point(&self) -> bool {
-        self.w == 1.0
-    }
-
     pub fn as_array(&self) -> [f64; 4] {
-        [self.x, self.y, self.z, self.w]
+        K::as_array(self)
     }
-
 }
 
 
@@ -434,26 +424,6 @@ mod tests {
 
 
     proptest! {
-
-        #[test]
-        fn vector_constructor_returns_a_vector(
-            x in any::<f64>(),
-            y in any::<f64>(),
-            z in any::<f64>(),
-        ) {
-            let a = Tuple::vector(x, y, z);
-            assert!(a.is_vector());
-        }
-
-        #[test]
-        fn point_constructor_returns_a_point(
-            x in any::<f64>(),
-            y in any::<f64>(),
-            z in any::<f64>(),
-        ) {
-            let a = Tuple::point(x, y, z);
-            assert!(a.is_point());
-        }
 
         #[test]
         fn adding_vectors(
@@ -487,7 +457,6 @@ mod tests {
             x in any::<f64>(),
             y in any::<f64>(),
             z in any::<f64>(),
-            w in any::<f64>(),
         ) {
             let a = Tuple::vector(x, y, z);
             let b = Tuple::vector(-x, -y, -z);

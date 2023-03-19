@@ -76,13 +76,7 @@ pub fn normal_at_sphere(obj: &Object, world_point: &Tuple<Point>) -> Tuple<Vecto
     // (applying the inverse will squash normals,
     // preventing them from being perpendicular to the surface.)
 
-    // Optimisation opportunities:
-    // - only matmul the non-w parts
-    let mut normal = &obj.inverse_transform_transposed / object_normal;
-    // Our implementation of translations doesn't
-    // play nice with transpose, but we can just zero out
-    // w to ignore this, since we know normals should be vectors :)
-    normal.w = 0.0;
+    let normal = &obj.inverse_transform_transposed / object_normal;
     normal.unit()
 }
 
