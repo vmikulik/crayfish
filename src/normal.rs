@@ -5,7 +5,6 @@ use crate::{object::Object, tuples::{Tuple, Vector, Point}, eq};
 ///
 /// Assumes `normal` is a unit vector.
 pub fn reflect(incoming: &Tuple<Vector>, normal: &Tuple<Vector>) -> Tuple<Vector> {
-    debug_assert!(incoming.dot(&normal) < 0.);
     incoming - normal * 2.0 * incoming.dot(&normal)
 }
 

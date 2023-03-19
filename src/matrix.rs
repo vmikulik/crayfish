@@ -191,15 +191,27 @@ impl Matrix {
         Ok(result)
     }
 
+    /// Matmul by tuple.
+    ///
+    /// The tuple is implicitly 4-d, with a 4th element
+    /// denoting whether it's a vector (if 0) or a point (if 1).
+    /// This means the bottom row of our matrices is assumed
+    /// to be 0, 0, 0, 1. and the rightmost column
+    /// is essentially the translation vector, which
+    /// only gets applied to points.
     pub fn matmul_t<K: TupleType<K>>(&self, _rhs: &Tuple<K>) -> Result<Tuple<K>> {
         if self.width != 4 || self.height != 4 {
             return Err("Matrix must be 4x4".into());
         }
         let rhs_contents = _rhs.as_array();
-        let mut out: [f64; 4] = [0.0; 4];
-        for i in 0..self.height {
-            for j in 0..self.width {
-                out[i] += self.contents[i][j] *rhs_contents[j]
+        let mut out: [f64; 3] = [0.0; 3];
+        // If it's a vector, we don't bother looking at the
+        // rightmost column as it would be multiplied by 0.
+        let width = if rhs_contents[3] == 0.0 {3} else {4};
+        // We don't care about the bottom row in any case.
+        for i in 0..self.height-1 {
+            for j in 0..width {
+                out[i] += self.contents[i][j] * rhs_contents[j]
             }
         }
 
