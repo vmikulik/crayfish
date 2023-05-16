@@ -1,4 +1,4 @@
-use crate::{object::Object, tuples::{Tuple, Vector, Point}, eq};
+use crate::{object::Object, tuples::{Tuple, Vector, Point}, eq, minimum_by_key};
 
 
 /// Reflects vector `v` in a surface with `normal`.
@@ -74,6 +74,22 @@ pub fn normal_at_sphere(obj: &Object, world_point: &Tuple<Point>) -> Tuple<Vecto
     // The correct transformation for normals isn't what you expect!
     // (applying the inverse will squash normals,
     // preventing them from being perpendicular to the surface.)
+
+    let normal = &obj.inverse_transform_transposed / object_normal;
+    normal.unit()
+}
+
+pub fn normal_at_cube(obj: &Object, world_point: &Tuple<Point>) -> Tuple<Vector> {
+    let object_point: Tuple<Point> = &obj.inverse_transform / world_point;
+    let obj_point_array = [object_point.x, object_point.y, object_point.z];
+    // To compute max of f(), we find min of -f().
+    let max_abs_dir = minimum_by_key([0, 1, 2].iter(), |i| -obj_point_array[*i].abs()).unwrap();
+    let object_normal = match max_abs_dir {
+        0 => Tuple::vector(object_point.x, 0., 0.),
+        1 => Tuple::vector(0., object_point.y, 0.),
+        2 => Tuple::vector(0., 0., object_point.z),
+        _ => unreachable!(),
+    };
 
     let normal = &obj.inverse_transform_transposed / object_normal;
     normal.unit()

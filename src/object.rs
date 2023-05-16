@@ -2,12 +2,14 @@ use crate::materials::Material;
 use crate::matrix::Matrix;
 use crate::tuples::{Tuple, Point, Vector};
 use crate::normal::{
-    normal_at_sphere
+    normal_at_sphere,
+    normal_at_cube,
 };
 
 #[derive(Debug)]
 pub enum Shape {
     Sphere,
+    Cube,
 }
 
 #[derive(Debug)]
@@ -20,14 +22,18 @@ pub struct Object {
 }
 
 impl Object {
-    pub fn new_sphere() -> Object {
+    pub fn new(shape: Shape) -> Object {
         Object {
-            shape: Shape::Sphere,
+            shape,
             material: Default::default(),
             transform: Matrix::identity(4),
             inverse_transform: Matrix::identity(4),
             inverse_transform_transposed: Matrix::identity(4),
         }
+    }
+
+    pub fn new_sphere() -> Object {
+        Object::new(Shape::Sphere)
     }
 
     pub fn with_material(self, material: Box<dyn Material>) -> Object {
@@ -50,7 +56,8 @@ impl Object {
 
     pub fn normal_at(&self, position: Tuple<Point>) -> Tuple<Vector> {
         match self.shape {
-            Shape::Sphere => normal_at_sphere(&self, &position)
+            Shape::Sphere => normal_at_sphere(&self, &position),
+            Shape::Cube => normal_at_cube(&self, &position),
         }
     }
 }

@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Camera
     let camera = Camera::new(
         Tuple::point(4., 4., -10.),
-        Tuple::point(0., 0., 0.),
+        Tuple::point(1., 1., 0.),
         config.aspect_ratio,
         config.fov_radians,
         None,
@@ -74,7 +74,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     ).with_material(
         Box::new(Lambertian::new(Color::from_u8(35, 21, 105)))
     ));
-    world.add(Object::new_sphere().with_transform(
+    world.add(Object::new(crayfish::object::Shape::Cube).with_transform(
         translation(0., 0., 0.)
     ).with_material(
         Box::new(Dielectric::new(1.52))
@@ -93,7 +93,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         scaling(100., 100., 100.)
         .translate(0., -101., 0.)
     ).with_material(
-        Box::new(Lambertian::new(Color::from_u8(105, 63, 21)))
+        Box::new(Lambertian::new(Color::from_u8(50, 50, 70)))
     ));
 
     // Main loop

@@ -369,14 +369,6 @@ impl Tuple<Vector> {
         }
     }
 
-    pub fn magnitude_squared(&self) -> f64 {
-        self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
-    }
-
-    pub fn magnitude(&self) -> f64 {
-        self.magnitude_squared().sqrt()
-    }
-
     pub fn unit(&self) -> Tuple<Vector> {
         self / self.magnitude()
     }
@@ -410,6 +402,14 @@ impl<K: TupleType<K>> Tuple<K> {
 
     pub fn as_array(&self) -> [f64; 4] {
         K::as_array(self)
+    }
+
+    pub fn magnitude_squared(&self) -> f64 {
+        self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
+    }
+
+    pub fn magnitude(&self) -> f64 {
+        self.magnitude_squared().sqrt()
     }
 }
 
