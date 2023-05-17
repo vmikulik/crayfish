@@ -5,12 +5,7 @@ use crate::normal::{
     normal_at_sphere,
     normal_at_cube,
 };
-
-#[derive(Debug)]
-pub enum Shape {
-    Sphere,
-    Cube,
-}
+use crate::shapes::Shape;
 
 #[derive(Debug)]
 pub struct Object {

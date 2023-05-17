@@ -12,6 +12,7 @@ use crayfish::tuples::Tuple;
 use crayfish::transformations::*;
 use crayfish::ray::Ray;
 use crayfish::groups::ObjectGroup;
+use crayfish::shapes::Shape;
 use rand::Rng;
 
 
@@ -74,7 +75,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     ).with_material(
         Box::new(Lambertian::new(Color::from_u8(35, 21, 105)))
     ));
-    world.add(Object::new(crayfish::object::Shape::Cube).with_transform(
+    world.add(Object::new(Shape::Cube).with_transform(
         translation(0., 0., 0.)
     ).with_material(
         Box::new(Dielectric::new(1.52))
