@@ -26,9 +26,7 @@ pub fn minimum_by_key<'a, F, T, I>(mut iter: I, key: F) -> Option<&'a T>
           I: std::iter::Iterator<Item = &'a T>
 {
     let mut smallest = iter.next();
-    if smallest.is_none() {
-        return None;
-    }
+    smallest?;
     loop {
         match iter.next() {
             None => return smallest,

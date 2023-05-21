@@ -20,7 +20,7 @@ pub fn intersect_sphere<'a>(ray: &Ray, obj: &'a Object) -> Vec<Intersection<'a>>
 
     let t1 = (-b - discriminant.sqrt()) / (2.0 * a);
     let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
-    return vec![
+    vec![
         Intersection::new(t1, obj),
         Intersection::new(t2, obj),
     ]
@@ -155,7 +155,7 @@ mod sphere_normal_tests {
             .scale(1., 0.5, 1.)
         );
         assert_eq!(
-            s.normal_at(Tuple::point(0., 2.0_f64.sqrt()/2.0, -2.0_f64.sqrt()/2.0)),
+            s.normal_at(Tuple::point(0., 2.0_f64.sqrt()/2.0, -(2.0_f64.sqrt())/2.0)),
             Tuple::vector(0., 0.97014, -0.24254)
         )
     }

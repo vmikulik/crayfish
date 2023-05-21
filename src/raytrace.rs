@@ -27,7 +27,7 @@ pub fn ray_color(
     }
 
     if let Some(h) = hit(
-        intersect(&ray, world).as_slice(), min_t,
+        intersect(ray, world).as_slice(), min_t,
     ) {
         return h.object.material
             .scatter(ray, h)
@@ -41,7 +41,7 @@ pub fn ray_color(
     let t = (1. + ray.direction.unit().y) / 2.;
     let blue = Color::from_u8(135, 181, 235);
     let lightblue = Color::from_u8(135, 231, 235);
-     return blue * t + lightblue * (1. - t);
+     blue * t + lightblue * (1. - t)
 }
 
 
@@ -77,7 +77,7 @@ pub fn render_scene(
                 let y_sample = rng.gen_range(y..y+pixel_height);
 
                 let ray = camera.cast_ray(x_sample, y_sample);
-                let sample = ray_color(&ray, &world, 0., 0, &config);
+                let sample = ray_color(&ray, &world, 0., 0, config);
                 color = color + sample;
             }
             canvas.write_pixel(
@@ -88,5 +88,5 @@ pub fn render_scene(
         }
     }
 
-    return canvas
+    canvas
 }

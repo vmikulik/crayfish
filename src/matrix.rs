@@ -108,7 +108,7 @@ impl std::cmp::PartialEq for Matrix {
                 }
             }
         }
-        return true;
+        true
     }
 }
 
@@ -253,7 +253,7 @@ impl Matrix {
 
         for i in 0..self.height {
             for j in 0..self.width {
-                result.contents[j][i] = cofactor(&self, i, j)? / det;
+                result.contents[j][i] = cofactor(self, i, j)? / det;
             }
         }
         Ok(result)
@@ -518,7 +518,7 @@ pub mod proptest_strategies {
     use super::Matrix;
 
     pub fn matrix_4x4(max_val: f64) -> impl Strategy<Value = Matrix> {
-        return (
+        (
             prop::collection::vec(-max_val..max_val, 4),
             prop::collection::vec(-max_val..max_val, 4),
             prop::collection::vec(-max_val..max_val, 4),

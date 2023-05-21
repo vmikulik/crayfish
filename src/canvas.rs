@@ -80,8 +80,8 @@ impl Canvas {
 
         let mut line = String::new();
         let write_and_clear_line = |out: &mut String, line: &mut String| {
-            out.push_str(&line.trim_end());
-            out.push_str("\n");
+            out.push_str(line.trim_end());
+            out.push('\n');
             line.clear();
         };
         for row in data_rows {
@@ -94,7 +94,7 @@ impl Canvas {
             }
             write_and_clear_line(&mut out, &mut line);
         }
-        return out;
+        out
     }
 }
 
@@ -127,7 +127,7 @@ mod tests {
     fn to_ppm_header() {
         let c = Canvas::new(5, 3);
         let ppm = c.to_ppm();
-        let lines: Vec<&str> = ppm.split("\n").collect();
+        let lines: Vec<&str> = ppm.split('\n').collect();
         assert_eq!(lines[0], "P3");
         assert_eq!(lines[1], "5 3");
         assert_eq!(lines[2], "255");
@@ -144,7 +144,7 @@ mod tests {
         canvas.write_pixel(4, 2, c3);
 
         let ppm = canvas.to_ppm();
-        let ppm_lines = ppm.split("\n").collect::<Vec<&str>>();
+        let ppm_lines = ppm.split('\n').collect::<Vec<&str>>();
         assert_eq!(ppm_lines[3], "255 0 0 0 0 0 0 0 0 0 0 0 0 0 0");
         assert_eq!(ppm_lines[4], "0 0 0 0 0 0 0 128 0 0 0 0 0 0 0");
         assert_eq!(ppm_lines[5], "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255");
@@ -154,7 +154,7 @@ mod tests {
     fn to_ppm_lines_are_below_70() {
         let canvas = Canvas::new(100, 2);
         let ppm = canvas.to_ppm();
-        let ppm_lines = ppm.split("\n").collect::<Vec<&str>>();
+        let ppm_lines = ppm.split('\n').collect::<Vec<&str>>();
         for line in ppm_lines {
             assert!(line.len() <= 70);
         }

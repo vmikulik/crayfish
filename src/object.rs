@@ -46,7 +46,7 @@ impl Object {
     }
 
     pub fn normal_at(&self, position: Tuple<Point>) -> Tuple<Vector> {
-        self.shape.normal_at(&self, &position)
+        self.shape.normal_at(self, &position)
     }
 }
 

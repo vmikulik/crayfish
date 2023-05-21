@@ -187,7 +187,7 @@ mod tests {
         let full_quarter = rotation(Z, std::f64::consts::PI / 2.0);
         assert_eq!(
             half_quarter.matmul_t(&p)?,
-            Tuple::point(-2f64.sqrt() / 2.0, 2f64.sqrt() / 2.0, 0.0)
+            Tuple::point(-(2f64.sqrt()) / 2.0, 2f64.sqrt() / 2.0, 0.0)
         );
         assert_eq!(
             full_quarter.matmul_t(&p)?,

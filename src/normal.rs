@@ -5,7 +5,7 @@ use crate::{tuples::{Tuple, Vector}, eq};
 ///
 /// Assumes `normal` is a unit vector.
 pub fn reflect(incoming: &Tuple<Vector>, normal: &Tuple<Vector>) -> Tuple<Vector> {
-    incoming - normal * 2.0 * incoming.dot(&normal)
+    incoming - normal * 2.0 * incoming.dot(normal)
 }
 
 

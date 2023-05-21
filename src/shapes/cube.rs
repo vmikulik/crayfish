@@ -41,7 +41,7 @@ pub fn intersect_cube<'a>(ray: &Ray, obj: &'a Object) -> Vec<Intersection<'a>>{
         }
     }
 
-    return intersections
+    intersections
 
 }
 

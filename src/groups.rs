@@ -18,7 +18,7 @@ impl Intersectable for ObjectGroup {
     fn intersect<'a>(ray: &Ray, obj: &'a Self) -> Vec<Intersection<'a>> {
         let mut intersections = vec![];
         for inner_obj in obj.objects.iter() {
-            intersections.append(&mut intersect(&ray, inner_obj));
+            intersections.append(&mut intersect(ray, inner_obj));
         }
         intersections
     }
