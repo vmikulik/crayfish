@@ -13,6 +13,7 @@ pub mod camera;
 pub mod materials;
 pub mod cli;
 pub mod shapes;
+pub mod raytrace;
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
