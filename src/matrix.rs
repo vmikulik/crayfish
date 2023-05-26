@@ -10,6 +10,27 @@ pub struct Matrix {
     contents: Vec<Vec<f64>>,
 }
 
+
+impl std::ops::Index<(usize, usize)> for Matrix {
+    type Output = f64;
+
+    fn index(&self, _index: (usize, usize)) -> &f64 {
+        match _index {
+            (i, j) => &self.contents[i][j],
+        }
+    }
+}
+
+
+impl std::ops::IndexMut<(usize, usize)> for Matrix {
+    fn index_mut(&mut self, _index: (usize, usize)) -> &mut f64 {
+        match _index {
+            (i, j) => &mut self.contents[i][j],
+        }
+    }
+}
+
+
 /// `/` means Matrix multiplication.
 impl std::ops::Div<&Matrix> for Matrix {
     type Output = Matrix;
@@ -82,19 +103,6 @@ impl<K: TupleType<K>> std::ops::Div<Tuple<K>> for &Matrix {
     }
 }
 
-impl std::ops::Index<usize> for Matrix {
-    type Output = Vec<f64>;
-
-    fn index(&self, _index: usize) -> &Vec<f64> {
-        &self.contents[_index]
-    }
-}
-
-impl std::ops::IndexMut<usize> for Matrix {
-    fn index_mut(&mut self, _index: usize) -> &mut Vec<f64> {
-        &mut self.contents[_index]
-    }
-}
 
 impl std::cmp::PartialEq for Matrix {
     fn eq(&self, _rhs: &Matrix) -> bool {
@@ -103,7 +111,7 @@ impl std::cmp::PartialEq for Matrix {
         }
         for i in 0..self.height {
             for j in 0..self.width {
-                if (self.contents[i][j] - _rhs.contents[i][j]).abs() > EPSILON {
+                if (self[(i,j)] - _rhs[(i,j)]).abs() > EPSILON {
                     return false;
                 }
             }
@@ -142,23 +150,19 @@ impl Matrix {
         if heights.iter().any(|h| *h != height) {
             return Err("All columns must have the same length".into());
         }
-        let mut contents = vec![vec![0.; width]; height];
+        let mut m = Matrix::new(width, height);
         for i in 0..height {
             for j in 0..width {
-                contents[i][j] = cols[j][i];
+                m[(i,j)] = cols[j][i];
             }
         }
-        Ok(Matrix {
-            height,
-            width,
-            contents,
-        })
+        Ok(m)
     }
 
     pub fn identity(size: usize) -> Matrix {
         let mut result = Matrix::new(size, size);
         for i in 0..size {
-            result.contents[i][i] = 1.;
+            result[(i,i)] = 1.;
         }
         result
     }
@@ -167,7 +171,7 @@ impl Matrix {
         let mut result = Matrix::new(self.width, self.height);
         for i in 0..self.height {
             for j in 0..self.width {
-                result.contents[j][i] = self.contents[i][j];
+                result[(j, i)] = self[(i, j)];
             }
         }
         result
@@ -184,7 +188,7 @@ impl Matrix {
         for i in 0..height {
             for j in 0..width {
                 for k in 0..inner {
-                    result.contents[i][j] += self.contents[i][k] * _rhs.contents[k][j];
+                    result[(i,j)] += self[(i,k)] * _rhs[(k,j)];
                 }
             }
         }
@@ -211,7 +215,7 @@ impl Matrix {
         // We don't care about the bottom row in any case.
         for i in 0..self.height-1 {
             for j in 0..width {
-                out[i] += self.contents[i][j] * rhs_contents[j]
+                out[i] += self[(i,j)] * rhs_contents[j]
             }
         }
 
@@ -232,7 +236,7 @@ impl Matrix {
                 if i != row && j != col {
                     let new_i = if i > row { i - 1 } else { i };
                     let new_j = if j > col { j - 1 } else { j };
-                    result.contents[new_i][new_j] = self.contents[i][j];
+                    result[(new_i,new_j)] = self[(i,j)];
                 }
             }
         }
@@ -253,7 +257,7 @@ impl Matrix {
 
         for i in 0..self.height {
             for j in 0..self.width {
-                result.contents[j][i] = cofactor(self, i, j)? / det;
+                result[(j,i)] = cofactor(self, i, j)? / det;
             }
         }
         Ok(result)
@@ -268,17 +272,17 @@ pub fn det(m: &Matrix) -> Result<f64> {
         return Err("Matrix must be square".into());
     }
     if m.height == 1 {
-        return Ok(m.contents[0][0]);
+        return Ok(m[(0,0)]);
     }
     if m.height == 2 {
-        return Ok(m.contents[0][0] * m.contents[1][1]
-                  - m.contents[0][1] * m.contents[1][0]);
+        return Ok(m[(0,0)] * m[(1,1)]
+                  - m[(0,1)] * m[(1,0)]);
     }
     let mut result = 0.;
     for i in 0..m.width {
         let submatrix = m.submatrix(0, i)?;
         let sign = if i % 2 == 0 { 1. } else { -1. };
-        result += sign * m.contents[0][i] * det(&submatrix)?;
+        result += sign * m[(0,i)] * det(&submatrix)?;
     }
     Ok(result)
 

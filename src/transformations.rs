@@ -33,18 +33,18 @@ impl Transformable for Matrix {
 /// Does not affect vectors.
 pub fn translation(x: f64, y: f64, z: f64) -> Matrix {
     let mut m = Matrix::identity(4);
-    m[0][3] = x;
-    m[1][3] = y;
-    m[2][3] = z;
+    m[(0,3)] = x;
+    m[(1,3)] = y;
+    m[(2,3)] = z;
     m
 }
 
 /// Scales Tuples by the given x, y, and z values.
 pub fn scaling(x: f64, y: f64, z: f64) -> Matrix {
     let mut m = Matrix::identity(4);
-    m[0][0] = x;
-    m[1][1] = y;
-    m[2][2] = z;
+    m[(0,0)] = x;
+    m[(1,1)] = y;
+    m[(2,2)] = z;
     m
 }
 
@@ -53,22 +53,22 @@ pub fn rotation(axis: Axis, radians: f64) -> Matrix {
     let mut m = Matrix::identity(4);
     match axis {
         Axis::X => {
-            m[1][1] = radians.cos();
-            m[1][2] = -radians.sin();
-            m[2][1] = radians.sin();
-            m[2][2] = radians.cos();
+            m[(1,1)] = radians.cos();
+            m[(1,2)] = -radians.sin();
+            m[(2,1)] = radians.sin();
+            m[(2,2)] = radians.cos();
         }
         Axis::Y => {
-            m[0][0] = radians.cos();
-            m[0][2] = radians.sin();
-            m[2][0] = -radians.sin();
-            m[2][2] = radians.cos();
+            m[(0,0)] = radians.cos();
+            m[(0,2)] = radians.sin();
+            m[(2,0)] = -radians.sin();
+            m[(2,2)] = radians.cos();
         }
         Axis::Z => {
-            m[0][0] = radians.cos();
-            m[0][1] = -radians.sin();
-            m[1][0] = radians.sin();
-            m[1][1] = radians.cos();
+            m[(0,0)] = radians.cos();
+            m[(0,1)] = -radians.sin();
+            m[(1,0)] = radians.sin();
+            m[(1,1)] = radians.cos();
         }
     }
     m
@@ -87,12 +87,12 @@ pub fn shearing(
     zy: f64,
 ) -> Matrix {
     let mut m = Matrix::identity(4);
-    m[0][1] = xy;
-    m[0][2] = xz;
-    m[1][0] = yx;
-    m[1][2] = yz;
-    m[2][0] = zx;
-    m[2][1] = zy;
+    m[(0,1)] = xy;
+    m[(0,2)] = xz;
+    m[(1,0)] = yx;
+    m[(1,2)] = yz;
+    m[(2,0)] = zx;
+    m[(2,1)] = zy;
     m
 }
 
