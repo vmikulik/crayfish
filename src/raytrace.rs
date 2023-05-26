@@ -46,7 +46,7 @@ pub fn ray_color(
 
 
 pub fn render_scene(
-    world: impl Intersectable,
+    world: &impl Intersectable,
     camera: &Camera,
     config: &Config,
 ) -> Canvas {
@@ -61,11 +61,13 @@ pub fn render_scene(
     let (from_row, to_row) = config.row_range;
     for y_pixel in from_row..to_row {
         if y_pixel % 1 == 0 {
-            let duration = start_time.elapsed();
-            println!(
-                "Rendering row {} of {}, time elapsed: {:?}",
-                y_pixel, to_row-from_row, duration
-            );
+            if config.verbose {
+                let duration = start_time.elapsed();
+                println!(
+                    "Rendering row {} of {}, time elapsed: {:?}",
+                    y_pixel, to_row-from_row, duration
+                );
+            }
         }
         for x_pixel in 0..canvas.width {
             let y = y_pixel as f64 / canvas.height as f64;
@@ -77,7 +79,7 @@ pub fn render_scene(
                 let y_sample = rng.gen_range(y..y+pixel_height);
 
                 let ray = camera.cast_ray(x_sample, y_sample);
-                let sample = ray_color(&ray, &world, 0., 0, config);
+                let sample = ray_color(&ray, world, 0., 0, config);
                 color = color + sample;
             }
             canvas.write_pixel(

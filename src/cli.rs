@@ -10,6 +10,7 @@ pub struct Config {
     pub outfile: String,
     pub image_height: usize,
     pub row_range: (usize, usize),
+    pub verbose: bool,
     // Quality settings
     pub rays_per_pixel: usize,
     pub max_scatter_depth: usize,
@@ -112,6 +113,7 @@ pub fn make_config(matches: clap::ArgMatches) -> Result<Config, Box::<dyn Error>
         outfile: matches.get_one::<String>("outfile").unwrap().to_owned(),
         image_height,
         row_range,
+        verbose: true,
         rays_per_pixel: *matches.get_one("rays_per_pixel").unwrap(),
         max_scatter_depth: *matches.get_one("max_scatter_depth").unwrap(),
     })
@@ -135,6 +137,7 @@ mod tests {
                 outfile: "out".to_string(),
                 image_height: 100,
                 row_range: (0, 100),
+                verbose: true,
                 rays_per_pixel: 200,
                 max_scatter_depth: 30,
             }

@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         Box::new(Lambertian::new(Color::from_u8(50, 50, 70)))
     ));
 
-    let canvas = render_scene(world, &camera, &config);
+    let canvas = render_scene(&world, &camera, &config);
 
     let outpath = format!("{}.ppm", config.outfile);
     std::fs::write(outpath, canvas.to_ppm())

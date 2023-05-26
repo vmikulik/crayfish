@@ -11,3 +11,8 @@ clap = "4.1.8"
 
 [dev-dependencies]
 proptest = "1.0.0"
+criterion = "0.3"
+
+[[bench]]
+name = "render_cube"
+harness = false
