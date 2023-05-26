@@ -7,7 +7,7 @@ use crate::eq;
 pub struct Matrix {
     pub width: usize,
     pub height: usize,
-    contents: Vec<Vec<f64>>,
+    contents: Vec<f64>,
 }
 
 
@@ -16,7 +16,7 @@ impl std::ops::Index<(usize, usize)> for Matrix {
 
     fn index(&self, _index: (usize, usize)) -> &f64 {
         match _index {
-            (i, j) => &self.contents[i][j],
+            (i, j) => &self.contents[i * self.width + j],
         }
     }
 }
@@ -25,7 +25,7 @@ impl std::ops::Index<(usize, usize)> for Matrix {
 impl std::ops::IndexMut<(usize, usize)> for Matrix {
     fn index_mut(&mut self, _index: (usize, usize)) -> &mut f64 {
         match _index {
-            (i, j) => &mut self.contents[i][j],
+            (i, j) => &mut self.contents[i * self.width + j],
         }
     }
 }
@@ -125,7 +125,7 @@ impl Matrix {
         Matrix {
             height,
             width,
-            contents: vec![vec![0.; width]; height],
+            contents: vec![0.; width * height],
         }
     }
 
@@ -136,11 +136,13 @@ impl Matrix {
         if widths.iter().any(|w| *w != width) {
             return Err("All rows must have the same length".into());
         }
-        Ok(Matrix {
-            height,
-            width,
-            contents: rows.clone(),
-        })
+        let mut m = Matrix::new(width, height);
+        for i in 0..height {
+            for j in 0..width {
+                m[(i,j)] = rows[i][j];
+            }
+        }
+        Ok(m)
     }
 
     pub fn from_cols(cols: &Vec<Vec<f64>>) -> Result<Matrix> {
